@@ -1,0 +1,17 @@
+spring:
+  jpa:
+    open-in-view: false
+  application:
+    name: Sigil
+  datasource:
+    hikari:
+      pool-name: sigil-pool
+      minimum-idle: 2
+      driver-class-name: org.postgresql.Driver
+      maximum-pool-size: 10
+      connection-timeout: 3000
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog.xml
