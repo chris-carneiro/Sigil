@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="000002" author="cca" logicalFilePath="/db/changelog/0.x.x/000002_add_document_active_expires_at_idx.xml">
+        <sql>
+
+            CREATE INDEX document_active_expires_at_idx
+                ON document (expires_at) WHERE revoked_at IS NULL;
+        </sql>
+
+        <rollback>
+            DROP INDEX document_active_expires_at_idx;
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="000001" author="cca" logicalFilePath="/db/changelog/0.x.x/000001_init_db.sql">
+        <createTable tableName="document">
+            <column name="document_id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="iv" type="bytea">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="blob_path" type="varchar(512)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="mime_type" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="file_size" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="expires_at" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="revoked_at" type="timestamptz">
+            </column>
+        </createTable>
+
+        <createIndex tableName="document" indexName="document_validity_idx">
+            <column name="document_id"/>
+            <column name="revoked_at"/>
+            <column name="expires_at"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
