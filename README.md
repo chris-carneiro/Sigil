@@ -13,22 +13,31 @@ it cannot read.
 ## Quick Start
 
 **1.Environment Variables.**
+
 ### Production Mode:
+
 Create the .env file at the root of the project and fill with appropriate values**
 
-| Variable          | Description              |
-|-------------------|--------------------------|
-| POSTGRES_DB       | PostgreSQL Database name |
-| POSTGRES_USER     | Database username        |
-| POSTGRES_PASSWORD | Database password        |
+| Variable           | Description               |
+|--------------------|---------------------------|
+| POSTGRES_DB        | PostgreSQL Database name  |
+| POSTGRES_USER      | Database username         |
+| POSTGRES_PASSWORD  | Database password         |
+| SIGIL_STORAGE_PATH | Document storage location |
 
-These variables are read by Docker Compose and injected as environment variables into both the postgres and app containers when the full stack is run.
+These variables are read by Docker Compose and injected as environment variables into both the postgres and app
+containers when the full stack is run.
 
 ### Dev mode: Defaults should be provided in application-local.yaml for local development.
 
- **`application-local.yml` is gitignored. Create it locally inside src/main/resources/.**
+**`application-local.yml` is gitignored. Create it locally inside src/main/resources/.**
+
+```bash
+  In dev mode documents are stored inside `${user.home}/.sigil/private/documents` by default.
+```
 
 **2. Start the database**
+
 ```bash
   docker-compose up -d postgres
 ```
@@ -49,10 +58,10 @@ spring:
 ```
 
 **4. Run the application.**
+
 ```bash
   ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
-
 
 Or from IntelliJ with `-Dspring.profiles.active=local`
 in the run configuration.

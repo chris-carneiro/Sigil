@@ -7,5 +7,6 @@
 
     <include file="db/changelog/0.x.x/000001_init_db.xml"/>
     <include file="db/changelog/0.x.x/000002_add_document_active_expires_at_idx.xml"/>
+    <include file="db/changelog/0.x.x/000003_alter_document_drop_document_id_default_constraint.xml"/>
 
 </databaseChangeLog>
