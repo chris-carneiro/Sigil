@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="000003" author="cca"
+               logicalFilePath="/db/changelog/0.x.x/000003_alter_document_drop_document_id_default_constraint.xml">
+        <sql>alter table document
+            alter document_id drop default</sql>
+    </changeSet>
+</databaseChangeLog>

@@ -15,3 +15,9 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD}
   liquibase:
     change-log: classpath:/db/changelog/db.changelog.xml
+
+
+sigil:
+  document:
+    location:
+      path: ${SIGIL_STORAGE_PATH:${user.home}/.sigil/private/documents}
