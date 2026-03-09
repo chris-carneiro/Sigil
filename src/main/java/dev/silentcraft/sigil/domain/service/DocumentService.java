@@ -1,6 +1,7 @@
 package dev.silentcraft.sigil.domain.service;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -38,5 +39,11 @@ public class DocumentService {
                 blobPath,
                 properties.fileSize()
         );
+    }
+
+    public Optional<StoredDocument> find(UUID identity) {
+        return documentRepository.findById(identity)
+                .map(document -> new StoredDocument(document.identity()));
+
     }
 }
