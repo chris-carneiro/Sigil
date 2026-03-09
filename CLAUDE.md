@@ -49,17 +49,17 @@ Never reuse an IV — generate a fresh `crypto.getRandomValues(new Uint8Array(12
 
 ## Stack
 
-| Layer               | Technology               | Notes                                    |
-|---------------------|--------------------------|------------------------------------------|
-| Backend             | Java 17, Spring Boot 3.5 | Records, sealed classes, explicit config |
-| Database            | PostgreSQL 15 (Docker)   | Liquibase migrations — not Flyway        |
-| Cache               | Redis 7                  | Phase 3 — expiry and revocation          |
-| Frontend            | React 18                 | Phase 2+                                 |
-| Encryption (client) | Web Crypto API           | No library — raw primitives              |
-| Testing             | JUnit 5, Testcontainers  | Real PostgreSQL in tests, not H2         |
-| Build               | Maven                    |                                          |
-| Containers          | Docker Compose           | `docker-compose up` starts full stack    |
-| CI/CD               | GitHub Actions           | Phase 4                                  |
+| Layer               | Technology               | Notes                                                                                 |
+|---------------------|--------------------------|---------------------------------------------------------------------------------------|
+| Backend             | Java 17, Spring Boot 3.5 | Records, sealed classes, explicit config                                              |
+| Database            | PostgreSQL 15 (Docker)   | Liquibase migrations — not Flyway                                                     |
+| Cache               | Redis 7                  | Phase 3 — expiry and revocation                                                       |
+| Frontend            | React 19                 | Phase 2+ React 19 used deliberately with React 18 hook patterns for learning purposes |
+| Encryption (client) | Web Crypto API           | No library — raw primitives                                                           |
+| Testing             | JUnit 5, Testcontainers  | Real PostgreSQL in tests, not H2                                                      |
+| Build               | Maven                    |                                                                                       |
+| Containers          | Docker Compose           | `docker-compose up` starts full stack                                                 |
+| CI/CD               | GitHub Actions           | Phase 4                                                                               |
 
 ---
 
