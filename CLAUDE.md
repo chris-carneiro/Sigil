@@ -229,6 +229,7 @@ What becomes easier? What becomes harder? What must be remembered?
 - `StoredDocument` value object in `domain/valueobject`
 - `DocumentPropertiesTest` — 2 unit tests green, no Spring context, correct package placement
 -   `DocumentReadException` in `domain/error` — moved from api/error to fix dependency direction violation
+- `DocumentServiceIntegrationTest` - testcontainers - store and find methods nominal cases covered
 
 
 **Fakes**
@@ -247,11 +248,7 @@ What becomes easier? What becomes harder? What must be remembered?
 - **`FakeDocumentService` extends concrete class:** works now but will become awkward if `DocumentService` grows. First natural signal to discuss extracting an interface. Do not raise until it causes friction.
 - **`toEntity()` in `DocumentService` returns `new Document()`** with no fields set — the `DocumentProperties` data is not yet mapped to the entity. This is the most immediate incomplete piece of Task 2.1.
 
-### Up Next — Task 2.1 completion
-`toEntity()` in `DocumentService` must map `DocumentProperties` fields onto `Document` entity fields. Once that's done, Task 2.1 is complete.
-
-### Up Next — Task 2.2 (Testcontainers)
-Exit criteria: one passing `@Transactional` integration test against real PostgreSQL via Testcontainers — verifying that a stored document can be retrieved by ID.
+### Up Next — Phase 2
 
 ---
 
@@ -259,12 +256,12 @@ Exit criteria: one passing `@Transactional` integration test against real Postgr
 
 ### Phase 1 — Foundation (Weeks 1–2)
 | Task | Description | Status |
-|---|---|---|
+|---|---|--|
 | 1.1 | Maven project scaffold | ✅ |
 | 1.2 | Docker Compose — PostgreSQL 15, healthcheck | ✅ |
 | 1.3 | Liquibase V1 migration — `documents` table | ✅ |
-| 2.1 | Layered architecture scaffold | 🔄 near complete — `toEntity()` mapping outstanding |
-| 2.2 | Testcontainers — one passing `@Transactional` integration test | ⬜ |
+| 2.1 | Layered architecture scaffold | ✅ |
+| 2.2 | Testcontainers — one passing `@Transactional` integration test | ✅ |
 
 ### Phase 2 — Encryption (Weeks 3–4)
 | Task | Description |
