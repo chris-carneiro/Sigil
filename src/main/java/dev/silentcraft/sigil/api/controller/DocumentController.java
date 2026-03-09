@@ -33,7 +33,7 @@ public class DocumentController {
 
         StoredDocument storedDocument = documentService.store(DocumentProperties.from(document));
 
-        URI location = URI.create("/api/v1/documents/" + storedDocument.uuid());
+        URI location = URI.create("/api/v1/documents/" + storedDocument.identity());
 
         return ResponseEntity.created(location).build();
     }
