@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="000004" author="cca"
+               logicalFilePath="/db/changelog/0.x.x/000004_alter_document_drop_document_not_null_constraints.xml">
+        <sql>alter table document
+            alter iv drop not null</sql>
+        <sql>alter table document
+            alter mime_type drop not null </sql>
+        <sql>alter table document
+            alter expires_at drop not null </sql>
+        <sql>alter table document drop constraint if exists document_file_name_key</sql>
+        <sql>alter table document drop constraint if exists document_blob_path_key</sql>
+    </changeSet>
+</databaseChangeLog>
