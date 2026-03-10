@@ -13,7 +13,15 @@ function App() {
 async function handleFile(file) {
   console.log(file.name);
   const {cipherText, rawKey, iv} = await encrypt(file);
-  console.log("cipher", new Uint8Array(cipherText).toBase64({ alphabet: "base64url" }));
+
+  const formData = new FormData();
+  formData.append("document", new Blob([cipherText]));
+
+
+  fetch('/api/v1/documents', {
+    method: 'POST',
+    body: formData
+  })
 }
 
 export default App
