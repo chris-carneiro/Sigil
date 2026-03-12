@@ -303,8 +303,8 @@ What becomes easier? What becomes harder? What must be remembered?
 | Task | Description                                                                | Status |
 |------|----------------------------------------------------------------------------|--------|
 | 3.1  | Understand AES-GCM — key, IV, auth tag, IV reuse consequences              | ✅      |
-| 3.2  | React upload with Web Crypto encryption — `encryptFile()`                  |        |
-| 4.1  | QR code generation — key in `#` fragment, base64url, never in query params |        |
+| 3.2  | React upload with Web Crypto encryption — `encryptFile()`                  | ✅      |
+| 4.1  | QR code generation — key in `#` fragment, base64url, never in query params | ✅      |
 | 4.2  | Download + decryption — import key, fetch blob, decrypt, all error cases   |        |
 
 ### Phase 3 — Expiry and Revocation (Weeks 5–6)
