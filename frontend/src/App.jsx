@@ -18,10 +18,13 @@ async function handleFile(file) {
   formData.append("document", new Blob([cipherText]));
 
 
-  fetch('/api/v1/documents', {
+  const response = await fetch('/api/v1/documents', {
     method: 'POST',
     body: formData
-  })
+  });
+
+  const body = await response.json()
+  console.log("Response body=", body.documentId);
 }
 
 export default App

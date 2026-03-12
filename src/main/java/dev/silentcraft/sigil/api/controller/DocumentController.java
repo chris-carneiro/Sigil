@@ -1,6 +1,7 @@
 package dev.silentcraft.sigil.api.controller;
 
 import java.net.URI;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,8 +34,9 @@ public class DocumentController {
 
         StoredDocument storedDocument = documentService.store(DocumentProperties.from(document));
 
-        URI location = URI.create("/api/v1/documents/" + storedDocument.identity());
+        UUID documentId = storedDocument.identity();
+        URI location = URI.create("/api/v1/documents/" + documentId);
 
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(new DocumentResponse(documentId));
     }
 }
