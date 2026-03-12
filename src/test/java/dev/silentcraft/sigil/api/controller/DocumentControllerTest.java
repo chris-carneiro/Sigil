@@ -38,7 +38,10 @@ class DocumentControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(header().string("Location",
-                        "/api/v1/documents/00000000-0000-0000-0000-000000000001"));
+                        "/api/v1/documents/00000000-0000-0000-0000-000000000001"))
+                .andExpect(jsonPath("$.documentId").exists())
+                .andExpect(jsonPath("$.documentId")
+                        .value("00000000-0000-0000-0000-000000000001"));
     }
 
     @Test
@@ -64,9 +67,9 @@ class DocumentControllerTest {
                         .value("Required field 'document' is missing."));
     }
 
-     @Test
+    @Test
     void uploadDocument_returns500_whenFileIsUnreadable() throws Exception {
-        MockMultipartFile unreadableMultipartFile = new FakeUnreadableMultipartFile("document","bar".getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile unreadableMultipartFile = new FakeUnreadableMultipartFile("document", "bar".getBytes(StandardCharsets.UTF_8));
 
         mockMvc.perform(multipart("/api/v1/documents")
                         .file(unreadableMultipartFile))
