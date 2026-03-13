@@ -31,13 +31,65 @@ the answer — then let him apply it.
 
 ---
 
+## Secure Coding — Review Lens
+
+When reviewing code Chris has written, apply the following guidelines as a checklist.
+For each violation found: ask a Socratic question first. If Chris is stuck after one exchange,
+point to the specific guideline by name — not the fix.
+
+Guidelines are drawn from Oracle's Secure Coding Guidelines for Java SE.
+The markdown files live at `docs/coding/secure-guidelines/` — read them if you need the full context of a guideline.
+
+### Mutability (Section 6)
+
+- **6-1** — Are fields `private` and `final` where possible? If not, is there a documented
+  reason (e.g. JPA requirement)?
+- **6-2** — Does every constructor that accepts a mutable input (arrays, collections) make
+  a defensive copy? Does every accessor that returns a mutable field return a copy, not the
+  reference?
+
+### Input Validation (Section 5)
+
+- **5-1** — Are constructor and method inputs validated before use? Null checks with
+  `Objects.requireNonNull` or explicit guards — not incidental NPEs.
+
+### Confidential Information (Section 2)
+
+- **2-1** — Is sensitive data (keys, plaintext bytes) zeroed after use with `Arrays.fill`?
+  Flag any field that holds key material or decrypted content that has no clearing mechanism.
+- **2-2** — Is anything sensitive reachable via a `toString()`, log statement, or exception
+  message?
+
+### Object Construction (Section 7)
+
+- **7-1** — Does any constructor publish `this` before the object is fully initialised
+  (listener registration, passing `this` to another thread)?
+
+### Denial of Service (Section 1)
+
+- **1-1** — Are file sizes, input lengths, or collection sizes bounded before the value is
+  used in memory allocation or loops?
+
+### Serialization (Section 8)
+
+- **8-1 / 8-2** — Is any untrusted byte stream deserialised without validation? Are
+  deserialized objects validated before use?
+
+### When to raise a violation
+
+Raise security guideline findings proactively when reviewing code — do not wait to be asked.
+One finding per review turn. Do not pile violations: surface the most critical one, let Chris
+resolve it, then move to the next.
+
+---
+
 ## Security Model (read before touching any code)
 
 ```
-Browser encrypts file → uploads { encryptedBlob, iv } → server stores, returns documentId
-Browser encodes QR:  https://sigil.app/d/{documentId}#{base64url(iv)}:{base64url(rawKey)}
-                                         └─ sent to server ─┘  └──── never sent to server ────┘
-Recipient scans QR → browser parses fragment → downloads blob → decrypts locally
+Browser encrypts file → uploads { encryptedBlob, iv } → server stores both, returns documentId
+Browser encodes QR:  https://sigil.app/d/{documentId}#{base64url(rawKey)}
+                                         └─ sent to server ─┘  └─ never sent to server ─┘
+Recipient scans QR → browser parses fragment → fetches blob + iv from server → decrypts locally
 After expiry → server deletes blob → returns 410 Gone
 ```
 
