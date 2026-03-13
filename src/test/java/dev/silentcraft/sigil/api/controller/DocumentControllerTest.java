@@ -31,9 +31,13 @@ class DocumentControllerTest {
         MockMultipartFile file = new MockMultipartFile(
                 "document", "file.txt",
                 MediaType.TEXT_PLAIN_VALUE, "bar".getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile fileIv = new MockMultipartFile(
+                "iv", "ivFile",
+                MediaType.APPLICATION_OCTET_STREAM_VALUE, "bar".getBytes(StandardCharsets.UTF_8));
 
         mockMvc.perform(multipart("/api/v1/documents")
                         .file(file)
+                        .file(fileIv)
                         .characterEncoding("UTF_8"))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
@@ -52,8 +56,13 @@ class DocumentControllerTest {
                 MediaType.TEXT_PLAIN_VALUE,
                 new byte[0]);
 
+        MockMultipartFile fileIv = new MockMultipartFile(
+                "iv", "ivFile",
+                MediaType.APPLICATION_OCTET_STREAM_VALUE, "bar".getBytes(StandardCharsets.UTF_8));
+
         mockMvc.perform(multipart("/api/v1/documents")
-                        .file(emptyFile))
+                        .file(emptyFile)
+                        .file(fileIv))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
                         .value("Document must not be empty."));
@@ -70,9 +79,12 @@ class DocumentControllerTest {
     @Test
     void uploadDocument_returns500_whenFileIsUnreadable() throws Exception {
         MockMultipartFile unreadableMultipartFile = new FakeUnreadableMultipartFile("document", "bar".getBytes(StandardCharsets.UTF_8));
-
+        MockMultipartFile fileIv = new MockMultipartFile(
+                "iv", "ivFile",
+                MediaType.APPLICATION_OCTET_STREAM_VALUE, "bar".getBytes(StandardCharsets.UTF_8));
         mockMvc.perform(multipart("/api/v1/documents")
-                        .file(unreadableMultipartFile))
+                        .file(unreadableMultipartFile)
+                        .file(fileIv))
                 .andExpect(status().is5xxServerError())
                 .andExpect(jsonPath("$.message")
                         .value("Failed to process document."));

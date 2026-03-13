@@ -15,9 +15,10 @@ function App() {
   async function handleFile(file) {
     const { cipherText, rawKey, iv } = await encrypt(file);
 
+
     const formData = new FormData();
     formData.append("document", new Blob([cipherText]));
-
+    formData.append("iv", new Blob([iv], { type: "application/octet-stream" }));
 
     try {
       const response = await fetch('/api/v1/documents', {

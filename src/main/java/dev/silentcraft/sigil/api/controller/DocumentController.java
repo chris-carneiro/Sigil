@@ -1,5 +1,6 @@
 package dev.silentcraft.sigil.api.controller;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import dev.silentcraft.sigil.api.dto.DocumentResponse;
 import dev.silentcraft.sigil.api.error.InvalidDocumentException;
 import dev.silentcraft.sigil.domain.service.DocumentService;
-import dev.silentcraft.sigil.domain.valueobject.DocumentProperties;
+import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
 import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
 
 @RestController
@@ -27,12 +28,13 @@ public class DocumentController {
     }
 
     @PostMapping
-    public ResponseEntity<DocumentResponse> uploadDocument(@RequestParam("document") MultipartFile document) {
+    public ResponseEntity<DocumentResponse> uploadDocument(@RequestParam("document") MultipartFile document,
+                                                           @RequestParam("iv") MultipartFile fileIv) throws IOException {
         if (document.isEmpty()) {
             throw new InvalidDocumentException(InvalidDocumentException.EMPTY_DOCUMENT);
         }
 
-        StoredDocument storedDocument = documentService.store(DocumentProperties.from(document));
+        StoredDocument storedDocument = documentService.store(new EncryptedDocument(document.getOriginalFilename(), document.getBytes(), fileIv.getBytes()));
 
         UUID documentId = storedDocument.identity();
         URI location = URI.create("/api/v1/documents/" + documentId);

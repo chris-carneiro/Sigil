@@ -15,7 +15,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import dev.silentcraft.sigil.domain.valueobject.DocumentProperties;
+import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
 import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
 
 
@@ -44,7 +44,7 @@ class DocumentServiceIntegrationTest {
     @Test
     void store_returnsStoredDocument_whenSuccessful() {
         // GIVEN
-        DocumentProperties properties = new DocumentProperties("aFile.txt", "test".getBytes(StandardCharsets.UTF_8));
+        EncryptedDocument properties = new EncryptedDocument("aFile.txt", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
 
         // WHEN
         StoredDocument result = documentService.store(properties);
@@ -56,7 +56,7 @@ class DocumentServiceIntegrationTest {
     @Test
     void find_returnsStoredDocument_whenDocumentExists() {
         // GIVEN
-        DocumentProperties newDocument = new DocumentProperties("aFile.txt", "test".getBytes(StandardCharsets.UTF_8));
+        EncryptedDocument newDocument = new EncryptedDocument("aFile.txt", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
         StoredDocument document = documentService.store(newDocument);
         // WHEN
         Optional<StoredDocument> result = documentService.find(document.identity());
