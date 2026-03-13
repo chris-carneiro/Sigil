@@ -25,8 +25,8 @@ public class DocumentService {
         this.documentRepository = documentRepository;
     }
 
-    public StoredDocument store(EncryptedDocument properties) {
-        Document document = documentRepository.save(toEntity(properties));
+    public StoredDocument store(EncryptedDocument encryptedDocument) {
+        Document document = documentRepository.save(toEntity(encryptedDocument));
         return new StoredDocument(document.identity());
     }
 
@@ -37,13 +37,13 @@ public class DocumentService {
         return new Document(documentId,
                 properties.fileName(),
                 blobPath,
-                properties.fileSize()
+                properties.fileSize(),
+                properties.fileIv()
         );
     }
 
     public Optional<StoredDocument> find(UUID identity) {
         return documentRepository.findById(identity)
                 .map(document -> new StoredDocument(document.identity()));
-
     }
 }

@@ -14,7 +14,7 @@ public class FakeDocumentService extends DocumentService {
     }
 
     @Override
-    public StoredDocument store(EncryptedDocument document) {
+    public StoredDocument store(EncryptedDocument encryptedDocument) {
         return new StoredDocument(UUID.fromString("00000000-0000-0000-0000-000000000001"));
     }
 

@@ -4,11 +4,12 @@ import java.util.Arrays;
 
 public record EncryptedDocument(String fileName, byte[] encryptedFile, byte[] fileIv) {
 
-    static byte[] copy(byte... bytes) {
-        return Arrays.copyOf(bytes, bytes.length);
+    public EncryptedDocument {
+        encryptedFile = Arrays.copyOf(encryptedFile, encryptedFile.length);
+        fileIv = Arrays.copyOf(fileIv, fileIv.length);
     }
 
     public long fileSize() {
-        return copy(encryptedFile).length;
+        return encryptedFile.length;
     }
 }
