@@ -3,7 +3,7 @@ package dev.silentcraft.sigil.fake;
 import java.util.UUID;
 
 import dev.silentcraft.sigil.domain.service.DocumentService;
-import dev.silentcraft.sigil.domain.valueobject.DocumentProperties;
+import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
 import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
 
 public class FakeDocumentService extends DocumentService {
@@ -14,7 +14,7 @@ public class FakeDocumentService extends DocumentService {
     }
 
     @Override
-    public StoredDocument store(DocumentProperties document) {
+    public StoredDocument store(EncryptedDocument document) {
         return new StoredDocument(UUID.fromString("00000000-0000-0000-0000-000000000001"));
     }
 
