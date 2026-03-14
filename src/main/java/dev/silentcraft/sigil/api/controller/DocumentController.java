@@ -2,7 +2,6 @@ package dev.silentcraft.sigil.api.controller;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.NoSuchFileException;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -51,9 +50,9 @@ public class DocumentController {
     }
 
     @GetMapping("/{documentId}")
-    public ResponseEntity<byte[]> downloadDocument(@PathVariable UUID documentId) throws NoSuchFileException {
+    public ResponseEntity<byte[]> downloadDocument(@PathVariable UUID documentId) {
         StoredDocument storedDocument = documentService.find(documentId);
-//        ContentDisposition.builder("attachment").filename(storedDocument.fileName(), Charset.forName(storedDocument.mimeType()));
+//        TODO ContentDisposition.builder("attachment").filename(storedDocument.fileName(), Charset.forName(storedDocument.mimeType()));
         ContentDisposition attachment = ContentDisposition.builder("attachment").filename(storedDocument.fileName()).build();
         return ResponseEntity.ok()
                 .header("encryption-metadata-iv", Base64.getEncoder().encodeToString(storedDocument.iv()))

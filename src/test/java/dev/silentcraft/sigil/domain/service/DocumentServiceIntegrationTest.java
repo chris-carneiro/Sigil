@@ -1,7 +1,8 @@
 package dev.silentcraft.sigil.domain.service;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.NoSuchFileException;
+import java.time.Instant;
+import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Tag;
@@ -15,6 +16,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import dev.silentcraft.sigil.domain.entity.Document;
+import dev.silentcraft.sigil.domain.error.DocumentAccessRevokedException;
+import dev.silentcraft.sigil.domain.error.DocumentNotFoundException;
+import dev.silentcraft.sigil.domain.repository.DocumentRepository;
 import dev.silentcraft.sigil.domain.valueobject.DocumentIdentity;
 import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
 import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
@@ -28,6 +33,9 @@ class DocumentServiceIntegrationTest {
 
     @Autowired
     private DocumentService documentService;
+
+    @Autowired
+    private DocumentRepository documentRepository;
 
     @Container
     private static PostgreSQLContainer<?> postgresDB = new PostgreSQLContainer<>("postgres:15.17")
@@ -55,7 +63,7 @@ class DocumentServiceIntegrationTest {
     }
 
     @Test
-    void find_returnsStoredDocument_whenDocumentExists() throws NoSuchFileException {
+    void find_returnsStoredDocument_whenDocumentExists() {
         // GIVEN
         EncryptedDocument encryptedDocument = new EncryptedDocument("aFile.txt", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
         DocumentIdentity document = documentService.store(encryptedDocument);
@@ -66,6 +74,22 @@ class DocumentServiceIntegrationTest {
         Assertions.assertThat(result)
                 .extracting(StoredDocument::fileName)
                 .isEqualTo(encryptedDocument.fileName());
+    }
+
+    @Test
+    void find_throwsDocumentAccessRevokedException_whenDocumentIsRevoked() {
+        // GIVEN
+
+        final UUID revokedDocumentId = UUID.randomUUID();
+        Document revokedDocument = new Document(revokedDocumentId, "file", "path", 42L, "iv".getBytes(StandardCharsets.UTF_8),
+                Instant.parse("2025-12-03T10:15:30.00Z"));
+        documentRepository.save(revokedDocument);
+
+
+        // THEN
+        Assertions.assertThatThrownBy(() -> documentService.find(revokedDocumentId))
+                .isExactlyInstanceOf(DocumentAccessRevokedException.class)
+                .hasMessage(DocumentNotFoundException.DOCUMENT_NOT_FOUND);
     }
 
 }
