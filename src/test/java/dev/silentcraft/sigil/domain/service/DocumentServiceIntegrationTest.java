@@ -1,7 +1,7 @@
 package dev.silentcraft.sigil.domain.service;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+import java.nio.file.NoSuchFileException;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Tag;
@@ -15,8 +15,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
 import dev.silentcraft.sigil.domain.valueobject.DocumentIdentity;
+import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
+import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
 
 
 @SpringBootTest
@@ -54,18 +55,17 @@ class DocumentServiceIntegrationTest {
     }
 
     @Test
-    void find_returnsStoredDocument_whenDocumentExists() {
+    void find_returnsStoredDocument_whenDocumentExists() throws NoSuchFileException {
         // GIVEN
-        EncryptedDocument newDocument = new EncryptedDocument("aFile.txt", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
-        DocumentIdentity document = documentService.store(newDocument);
+        EncryptedDocument encryptedDocument = new EncryptedDocument("aFile.txt", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
+        DocumentIdentity document = documentService.store(encryptedDocument);
         // WHEN
-        Optional<DocumentIdentity> result = documentService.find(document.id());
+        StoredDocument result = documentService.find(document.id());
         // THEN
 
-        Assertions.assertThat(result).hasValueSatisfying(doc -> {
-            Assertions.assertThat(doc.id()).isEqualTo(document.id());
-        });
-
+        Assertions.assertThat(result)
+                .extracting(StoredDocument::fileName)
+                .isEqualTo(encryptedDocument.fileName());
     }
 
 }

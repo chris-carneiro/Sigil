@@ -2,6 +2,7 @@ package dev.silentcraft.sigil.api.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,10 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import dev.silentcraft.sigil.fake.FakeUnreadableMultipartFile;
 
@@ -102,10 +105,10 @@ class DocumentControllerTest {
         URI documentResource = URI.create("/api/v1/documents/%s".formatted(documentId));
 
         // WHEN
-        ResultActions result = mockMvc.perform(get(documentResource)
+        mockMvc.perform(get(documentResource)
                 ).andExpect(status().isOk())
-                .andExpect(jsonPath("$")
-                        .value(documentId.toString()));
-
+                .andExpect(header().exists("encryption-metadata-iv"))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"fileName\""))
+                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
     }
 }
