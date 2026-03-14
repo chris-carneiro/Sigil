@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import dev.silentcraft.sigil.domain.entity.Document;
 import dev.silentcraft.sigil.domain.repository.DocumentRepository;
 import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
-import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
+import dev.silentcraft.sigil.domain.valueobject.DocumentIdentity;
 
 @Service
 public class DocumentService {
@@ -25,9 +25,9 @@ public class DocumentService {
         this.documentRepository = documentRepository;
     }
 
-    public StoredDocument store(EncryptedDocument encryptedDocument) {
+    public DocumentIdentity store(EncryptedDocument encryptedDocument) {
         Document document = documentRepository.save(toEntity(encryptedDocument));
-        return new StoredDocument(document.identity());
+        return new DocumentIdentity(document.identity());
     }
 
 
@@ -42,8 +42,8 @@ public class DocumentService {
         );
     }
 
-    public Optional<StoredDocument> find(UUID identity) {
+    public Optional<DocumentIdentity> find(UUID identity) {
         return documentRepository.findById(identity)
-                .map(document -> new StoredDocument(document.identity()));
+                .map(document -> new DocumentIdentity(document.identity()));
     }
 }

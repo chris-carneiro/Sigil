@@ -1,11 +1,14 @@
 package dev.silentcraft.sigil.api.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import dev.silentcraft.sigil.fake.FakeUnreadableMultipartFile;
 
@@ -88,5 +92,20 @@ class DocumentControllerTest {
                 .andExpect(status().is5xxServerError())
                 .andExpect(jsonPath("$.message")
                         .value("Failed to process document."));
+    }
+
+
+    @Test
+    void downloadDocument_returnsOk_whenRequestSuccessful() throws Exception {
+        // GIVEN
+        UUID documentId = UUID.randomUUID();
+        URI documentResource = URI.create("/api/v1/documents/%s".formatted(documentId));
+
+        // WHEN
+        ResultActions result = mockMvc.perform(get(documentResource)
+                ).andExpect(status().isOk())
+                .andExpect(jsonPath("$")
+                        .value(documentId.toString()));
+
     }
 }
