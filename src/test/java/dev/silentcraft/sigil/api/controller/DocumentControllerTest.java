@@ -122,6 +122,19 @@ class DocumentControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
                         .value("Document can't be found"));
+    }
+
+    @Test
+    void downloadDocument_returnNotFound_whenDocumentIsRevoked() throws Exception {
+        // GIVEN
+        UUID documentId = FakeDocumentRepository.FAKE_REVOKED_DOCUMENT_UUID;
+        URI documentResource = URI.create("/api/v1/documents/%s".formatted(documentId));
+
+        // WHEN
+        mockMvc.perform(get(documentResource))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                        .value("Document can't be found"));
 
     }
 }
