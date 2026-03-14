@@ -7,6 +7,8 @@ import dev.silentcraft.sigil.domain.entity.Document;
 import dev.silentcraft.sigil.domain.repository.DocumentRepository;
 
 public class FakeDocumentRepository implements DocumentRepository {
+    public static final String FAKE_DOCUMENT_ID = "00000000-0000-0000-0000-000000000001";
+    public static final UUID FAKE_DOCUMENT_UUID = UUID.fromString(FAKE_DOCUMENT_ID);
 
     @Override
     public <S extends Document> S save(S entity) {

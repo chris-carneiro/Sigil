@@ -19,9 +19,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import dev.silentcraft.sigil.fake.FakeDocumentRepository;
 import dev.silentcraft.sigil.fake.FakeUnreadableMultipartFile;
 
 @WebMvcTest(DocumentController.class)
@@ -34,13 +33,13 @@ class DocumentControllerTest {
 
     @Test
     void uploadDocument_returnsCreated_whenRequestSuccessful() throws Exception {
-
         MockMultipartFile file = new MockMultipartFile(
                 "document", "file.txt",
                 MediaType.TEXT_PLAIN_VALUE, "bar".getBytes(StandardCharsets.UTF_8));
         MockMultipartFile fileIv = new MockMultipartFile(
                 "iv", "ivFile",
                 MediaType.APPLICATION_OCTET_STREAM_VALUE, "bar".getBytes(StandardCharsets.UTF_8));
+
 
         mockMvc.perform(multipart("/api/v1/documents")
                         .file(file)
@@ -101,14 +100,28 @@ class DocumentControllerTest {
     @Test
     void downloadDocument_returnsOk_whenRequestSuccessful() throws Exception {
         // GIVEN
+        UUID documentId = FakeDocumentRepository.FAKE_DOCUMENT_UUID;
+        URI documentResource = URI.create("/api/v1/documents/%s".formatted(documentId));
+
+        // WHEN
+        mockMvc.perform(get(documentResource))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("encryption-metadata-iv"))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"fileName\""))
+                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
+    }
+
+    @Test
+    void downloadDocument_returnNotFound_whenDocumentIsNotFound() throws Exception {
+        // GIVEN
         UUID documentId = UUID.randomUUID();
         URI documentResource = URI.create("/api/v1/documents/%s".formatted(documentId));
 
         // WHEN
-        mockMvc.perform(get(documentResource)
-                ).andExpect(status().isOk())
-                .andExpect(header().exists("encryption-metadata-iv"))
-                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"fileName\""))
-                .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
+        mockMvc.perform(get(documentResource))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                        .value("Document can't be found"));
+
     }
 }

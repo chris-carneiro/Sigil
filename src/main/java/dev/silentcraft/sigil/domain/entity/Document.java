@@ -1,6 +1,7 @@
 package dev.silentcraft.sigil.domain.entity;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -21,12 +22,14 @@ public class Document {
     private Document() {
     }
 
-    public Document(UUID documentId, String fileName, String blobPath, Long fileSize, byte... fileIv) {
+    public Document(UUID documentId, String fileName, String blobPath, Long fileSize, byte[] fileIv) {
+        byte[] iv = Objects.requireNonNull(fileIv, "Document entity - Iv column cannot be null");
+
         this.documentId = documentId;
         this.fileName = fileName;
         this.blobPath = blobPath;
         this.fileSize = fileSize;
-        this.fileIv = Arrays.copyOf(fileIv, fileIv.length);
+        this.fileIv = Arrays.copyOf(iv, fileIv.length);
     }
 
     public UUID identity() {
