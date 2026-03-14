@@ -16,7 +16,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
-import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
+import dev.silentcraft.sigil.domain.valueobject.DocumentIdentity;
 
 
 @SpringBootTest
@@ -47,7 +47,7 @@ class DocumentServiceIntegrationTest {
         EncryptedDocument properties = new EncryptedDocument("aFile.txt", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
 
         // WHEN
-        StoredDocument result = documentService.store(properties);
+        DocumentIdentity result = documentService.store(properties);
 
         // THEN
         Assertions.assertThat(result).isNotNull();
@@ -57,13 +57,13 @@ class DocumentServiceIntegrationTest {
     void find_returnsStoredDocument_whenDocumentExists() {
         // GIVEN
         EncryptedDocument newDocument = new EncryptedDocument("aFile.txt", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
-        StoredDocument document = documentService.store(newDocument);
+        DocumentIdentity document = documentService.store(newDocument);
         // WHEN
-        Optional<StoredDocument> result = documentService.find(document.identity());
+        Optional<DocumentIdentity> result = documentService.find(document.id());
         // THEN
 
         Assertions.assertThat(result).hasValueSatisfying(doc -> {
-            Assertions.assertThat(doc.identity()).isEqualTo(document.identity());
+            Assertions.assertThat(doc.id()).isEqualTo(document.id());
         });
 
     }

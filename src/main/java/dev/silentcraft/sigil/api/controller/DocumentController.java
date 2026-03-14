@@ -5,6 +5,8 @@ import java.net.URI;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,7 +17,7 @@ import dev.silentcraft.sigil.api.dto.DocumentResponse;
 import dev.silentcraft.sigil.api.error.InvalidDocumentException;
 import dev.silentcraft.sigil.domain.service.DocumentService;
 import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
-import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
+import dev.silentcraft.sigil.domain.valueobject.DocumentIdentity;
 
 @RestController
 @RequestMapping("/api/v1/documents")
@@ -34,9 +36,9 @@ public class DocumentController {
             throw new InvalidDocumentException(InvalidDocumentException.EMPTY_DOCUMENT);
         }
 
-        StoredDocument storedDocument = documentService.store(new EncryptedDocument(document.getOriginalFilename(), document.getBytes(), fileIv.getBytes()));
+        DocumentIdentity documentIdentity = documentService.store(new EncryptedDocument(document.getOriginalFilename(), document.getBytes(), fileIv.getBytes()));
 
-        UUID documentId = storedDocument.identity();
+        UUID documentId = documentIdentity.id();
         URI location = URI.create("/api/v1/documents/" + documentId);
 
         return ResponseEntity.created(location).body(new DocumentResponse(documentId));
