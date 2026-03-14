@@ -1,7 +1,6 @@
 package dev.silentcraft.sigil.domain.service;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.UUID;
 
@@ -9,9 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import dev.silentcraft.sigil.domain.entity.Document;
+import dev.silentcraft.sigil.domain.error.DocumentNotFoundException;
 import dev.silentcraft.sigil.domain.repository.DocumentRepository;
-import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
 import dev.silentcraft.sigil.domain.valueobject.DocumentIdentity;
+import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
 import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
 
 @Service
@@ -44,12 +44,12 @@ public class DocumentService {
         );
     }
 
-    public StoredDocument find(UUID identity) throws NoSuchFileException {
+    public StoredDocument find(UUID identity) {
         return documentRepository.findById(identity)
                 .map(document -> new StoredDocument(document.blobPath().getBytes(StandardCharsets.UTF_8),
                         document.iv(),
                         document.fileName(),
                         null)
-                ).orElseThrow(() -> new NoSuchFileException("File could not be found"));
+                ).orElseThrow(DocumentNotFoundException::new);
     }
 }
