@@ -32,6 +32,7 @@ public class DocumentService {
 
     public DocumentIdentity store(EncryptedDocument encryptedDocument) {
         Document document = documentRepository.save(toEntity(encryptedDocument));
+
         return new DocumentIdentity(document.identity());
     }
 
