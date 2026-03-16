@@ -11,6 +11,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 
 import dev.silentcraft.sigil.api.error.InvalidDocumentException;
 import dev.silentcraft.sigil.api.error.SigilErrorResponse;
+import dev.silentcraft.sigil.domain.error.BlobStorageException;
 import dev.silentcraft.sigil.domain.error.DocumentNotFoundException;
 
 @RestControllerAdvice
@@ -43,10 +44,14 @@ public class RestExceptionController {
     @ExceptionHandler(DocumentNotFoundException.class)
     public ResponseEntity<SigilErrorResponse> handleDocumentNotFoundException(DocumentNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(SigilErrorResponse.notFound(
-                        DocumentNotFoundException.DOCUMENT_NOT_FOUND)
+                .body(SigilErrorResponse.notFound(ex.getMessage())
                 );
     }
 
+    @ExceptionHandler(BlobStorageException.class)
+    public ResponseEntity<SigilErrorResponse> handleBlobStorageExceptino(BlobStorageException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(SigilErrorResponse.serviceUnavailable(ex.getMessage()));
+    }
 
 }
