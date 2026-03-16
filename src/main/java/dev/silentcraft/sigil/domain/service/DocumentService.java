@@ -37,7 +37,7 @@ public class DocumentService {
         UUID fileId = UUID.randomUUID();
         Document document = documentRepository.save(toEntity(encryptedDocument, fileId));
         blobStorage.store(locationPath.normalize().toAbsolutePath(), encryptedDocument.encryptedFile(), fileId.toString());
-        return new DocumentIdentity(document.identity());
+        return new DocumentIdentity(fileId);
     }
 
     public StoredDocument find(UUID identity) {
@@ -56,9 +56,8 @@ public class DocumentService {
     }
 
     private Document toEntity(EncryptedDocument properties, UUID fileId) {
-        UUID documentId = UUID.randomUUID();
         String blobPath = "%s/%s".formatted(locationPath.normalize().toAbsolutePath(), fileId);
-        return new Document(documentId,
+        return new Document(fileId,
                 properties.fileName(),
                 blobPath,
                 properties.fileSize(),

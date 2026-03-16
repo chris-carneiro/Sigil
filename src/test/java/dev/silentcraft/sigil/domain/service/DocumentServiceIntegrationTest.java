@@ -102,7 +102,7 @@ class DocumentServiceIntegrationTest {
     }
 
     @Test
-    void store_persistsDocumentToFileSystem_whenSuccesful() {
+    void store_persistsDocumentToFileSystem_whenSuccessful() {
         EncryptedDocument document = new EncryptedDocument("aFile.txt", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
         DocumentIdentity identity = documentService.store(document);
 
@@ -111,6 +111,7 @@ class DocumentServiceIntegrationTest {
 
         // THEN
         Assertions.assertThat(Files.exists(Paths.get(result.blobPath()))).isTrue();
+        Assertions.assertThat(result.identity()).isEqualTo(identity.id());
     }
 
 }
