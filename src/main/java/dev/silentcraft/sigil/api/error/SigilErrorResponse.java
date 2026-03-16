@@ -15,5 +15,9 @@ public record SigilErrorResponse(int status, String message) {
     public static SigilErrorResponse notFound(String message) {
         return new SigilErrorResponse(HttpStatus.NOT_FOUND.value(), message);
     }
+
+    public static SigilErrorResponse serviceUnavailable(String message) {
+        return new SigilErrorResponse(HttpStatus.SERVICE_UNAVAILABLE.value(), message);
+    }
 }
 

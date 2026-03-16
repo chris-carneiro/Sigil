@@ -4,6 +4,7 @@ package dev.silentcraft.sigil.storage;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,25 +19,26 @@ class FileSystemStorageTest {
     void store_returnsURI_whenSuccessful(@TempDir Path dir) {
         // GIVEN
         BlobStorage fileSystemStorage = new FileSystemStorage();
-
+        UUID fileName = UUID.randomUUID();
         // WHEN
-        URI result = fileSystemStorage.store(dir, "encryptedContent".getBytes(StandardCharsets.UTF_8));
+        URI result = fileSystemStorage.store(dir, "encryptedContent".getBytes(StandardCharsets.UTF_8), fileName.toString());
 
         // THEN
         Assertions.assertThat(result).isNotNull();
-        Assertions.assertThat(result.getPath()).isNotNull();
+        Assertions.assertThat(result.toString()).endsWith(fileName.toString());
     }
 
     @Test
     void store_throwsBlobStorageException_whenErrorOccured(@TempDir Path dir) {
         // GIVEN
         BlobStorage faultyBlobStorage = new FileSystemStorage();
+        String fileName = UUID.randomUUID().toString();
         dir.toFile().setReadOnly(); // triggers IOException by making the path readonly
 
         // WHEN & THEN
-        Assertions.assertThatThrownBy(() -> faultyBlobStorage.store(dir, new byte[0]))
+        Assertions.assertThatThrownBy(() -> faultyBlobStorage.store(dir, new byte[0], fileName))
                 .isExactlyInstanceOf(BlobStorageException.class)
-                .hasMessage("The document could not be stored. Please try again later");
+                .hasMessage("The document could not be stored. Please try again later.");
     }
 
 }

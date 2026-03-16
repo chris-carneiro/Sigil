@@ -20,7 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
-import dev.silentcraft.sigil.fake.FakeDocumentRepository;
+import dev.silentcraft.sigil.fake.FakeDocumentService;
 import dev.silentcraft.sigil.fake.FakeUnreadableMultipartFile;
 
 @WebMvcTest(DocumentController.class)
@@ -98,9 +98,30 @@ class DocumentControllerTest {
 
 
     @Test
+    void uploadDocument_return503_whenDocumentCantBeStored() throws Exception {
+        MockMultipartFile cantBeStored = new MockMultipartFile(
+                "document", "trigger_BlobStorageException",
+                MediaType.TEXT_PLAIN_VALUE, "bar".getBytes(StandardCharsets.UTF_8));
+
+        MockMultipartFile fileIv = new MockMultipartFile(
+                "iv", "ivFile",
+                MediaType.APPLICATION_OCTET_STREAM_VALUE, "bar".getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/api/v1/documents")
+                        .file(cantBeStored)
+                        .file(fileIv))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.message")
+                        .value("The document could not be stored. Please try again later."));
+
+
+    }
+
+
+    @Test
     void downloadDocument_returnsOk_whenRequestSuccessful() throws Exception {
         // GIVEN
-        UUID documentId = FakeDocumentRepository.FAKE_DOCUMENT_UUID;
+        UUID documentId = FakeDocumentService.FAKE_DOCUMENT_UUID;
         URI documentResource = URI.create("/api/v1/documents/%s".formatted(documentId));
 
         // WHEN
@@ -127,7 +148,7 @@ class DocumentControllerTest {
     @Test
     void downloadDocument_returnNotFound_whenDocumentIsRevoked() throws Exception {
         // GIVEN
-        UUID documentId = FakeDocumentRepository.FAKE_REVOKED_DOCUMENT_UUID;
+        UUID documentId = FakeDocumentService.FAKE_REVOKED_DOCUMENT_UUID;
         URI documentResource = URI.create("/api/v1/documents/%s".formatted(documentId));
 
         // WHEN
@@ -135,6 +156,6 @@ class DocumentControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
                         .value("Document can't be found"));
-
     }
+
 }

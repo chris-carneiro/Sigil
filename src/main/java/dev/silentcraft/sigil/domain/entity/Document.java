@@ -35,6 +35,10 @@ public class Document {
         this.revokedAt = revokedAt;
     }
 
+    public Document(UUID documentId, String fileName, String blobPath, Long fileSize, byte[] fileIv) {
+        this(documentId, fileName, blobPath, fileSize, fileIv, null);
+    }
+
     public UUID identity() {
         return documentId;
     }
