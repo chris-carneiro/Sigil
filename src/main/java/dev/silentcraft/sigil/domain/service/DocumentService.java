@@ -1,6 +1,5 @@
 package dev.silentcraft.sigil.domain.service;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.UUID;
 
@@ -47,7 +46,8 @@ public class DocumentService {
                             if (document.isRevoked()) {
                                 throw new DocumentAccessRevokedException();
                             }
-                            return new StoredDocument(document.blobPath().getBytes(StandardCharsets.UTF_8),
+                            Path documentPath = Path.of(document.blobPath());
+                            return new StoredDocument(blobStorage.read(documentPath),
                                     document.iv(),
                                     document.fileName(),
                                     null);
