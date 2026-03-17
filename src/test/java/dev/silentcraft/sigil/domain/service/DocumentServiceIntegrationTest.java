@@ -82,8 +82,9 @@ class DocumentServiceIntegrationTest {
 
         // THEN
         Assertions.assertThat(result)
-                .extracting(StoredDocument::fileName)
-                .isEqualTo(encryptedDocument.fileName());
+                .extracting(StoredDocument::fileName, StoredDocument::encryptedBlob)
+                .containsExactly(encryptedDocument.fileName(),
+                        "test".getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
