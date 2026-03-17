@@ -4,5 +4,7 @@ import java.net.URI;
 import java.nio.file.Path;
 
 public interface BlobStorage {
-    URI store(Path dir, byte[] content, String fileName);
+    URI store(Path dir, String fileName, byte[] content);
+
+    byte[] read(Path path);
 }

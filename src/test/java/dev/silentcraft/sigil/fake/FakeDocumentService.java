@@ -29,7 +29,7 @@ public class FakeDocumentService extends DocumentService {
     @Override
     public DocumentIdentity store(EncryptedDocument encryptedDocument) {
         if (Objects.equals(TRIGGER_BLOB_STORAGE_EXCEPTION, encryptedDocument.fileName())) {
-            throw new BlobStorageException();
+            throw new BlobStorageException(BlobStorageException.CANT_STORE_DOCUMENT);
         }
         return new DocumentIdentity(FAKE_DOCUMENT_UUID);
     }

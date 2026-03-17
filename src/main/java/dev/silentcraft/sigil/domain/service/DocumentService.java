@@ -27,7 +27,7 @@ public class DocumentService {
 
     public DocumentService(DocumentRepository documentRepository,
                            @Value("${sigil.document.location.path}") String locationPath, BlobStorage blobStorage) {
-        this.locationPath = Path.of(locationPath);
+        this.locationPath = Path.of(locationPath).normalize().toAbsolutePath();
         this.documentRepository = documentRepository;
         this.blobStorage = blobStorage;
     }
@@ -35,8 +35,9 @@ public class DocumentService {
     @Transactional
     public DocumentIdentity store(EncryptedDocument encryptedDocument) {
         UUID fileId = UUID.randomUUID();
-        Document document = documentRepository.save(toEntity(encryptedDocument, fileId));
-        blobStorage.store(locationPath.normalize().toAbsolutePath(), encryptedDocument.encryptedFile(), fileId.toString());
+        documentRepository.save(toEntity(encryptedDocument, fileId));
+
+        blobStorage.store(locationPath, fileId.toString(), encryptedDocument.encryptedFile());
         return new DocumentIdentity(fileId);
     }
 
@@ -56,7 +57,7 @@ public class DocumentService {
     }
 
     private Document toEntity(EncryptedDocument properties, UUID fileId) {
-        String blobPath = "%s/%s".formatted(locationPath.normalize().toAbsolutePath(), fileId);
+        String blobPath = "%s/%s".formatted(locationPath, fileId);
         return new Document(fileId,
                 properties.fileName(),
                 blobPath,
