@@ -8,8 +8,13 @@ import dev.silentcraft.sigil.domain.repository.BlobStorage;
 
 public class FakeFaultyFileStorage implements BlobStorage {
     @Override
-    public URI store(Path dir, byte[] content, String fileName) {
-        throw new BlobStorageException();
+    public URI store(Path dir, String fileName, byte[] content) {
+        throw new BlobStorageException(BlobStorageException.CANT_STORE_DOCUMENT);
 
+    }
+
+    @Override
+    public byte[] read(Path path) {
+        throw new UnsupportedOperationException("TODO implement read method");
     }
 }
