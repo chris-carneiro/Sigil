@@ -87,8 +87,8 @@ resolve it, then move to the next.
 
 ```
 Browser encrypts file → uploads { encryptedBlob, iv } → server stores both, returns documentId
-Browser encodes QR:  https://sigil.app/d/{documentId}#{base64url(rawKey)}
-                                         └─ sent to server ─┘  └─ never sent to server ─┘
+Browser encodes QR:  https://sigil.app/documents/download/{documentId}#{base64url(rawKey)}
+                                                └─ sent to server ─┘  └─ never sent to server ─┘
 Recipient scans QR → browser parses fragment → fetches blob + iv from server → decrypts locally
 After expiry → server deletes blob → returns 410 Gone
 ```
@@ -124,26 +124,31 @@ case the structure has intentionally evolved.
 
 ```
 src/main/java/dev/silentcraft/sigil/
-├── api
-│   ├── controller   ← HTTP only. Status codes, headers, request bodies. No business logic.
-│   │                  @RestControllerAdvice lives here — infrastructure exception translation only.
-│   ├── dto          ← Request/response records. API contract types only.
-│   └── error        ← SigilErrorResponse and API-related custom exceptions.
-├── domain
-│   ├── entity       ← JPA entities. Must not leak outside the domain layer.
-│   ├── repository   ← Data access interfaces. No business rules.
-│   ├── service      ← Business logic. Currently concrete classes. May evolve to interface + impl
-│   │                  if multiple implementations or testability needs arise — flag it as a
-│   │                  question if you see a reason to suggest the change, but never prompt it prematurely.
-│   └── valueobject  ← Immutable domain value types. No JPA annotations.
-└── SigilApplication.java
+  ├── api
+  │   ├── controller   ← HTTP only. Status codes, headers, request bodies. No business logic.
+  │   │                  @RestControllerAdvice lives here — infrastructure exception translation only.
+  │   ├── dto          ← Request/response records. API contract types only.
+  │   └── error        ← SigilErrorResponse and API-related custom exceptions.
+  ├── domain
+  │   ├── entity       ← JPA entities. Must not leak outside the domain layer.
+  │   ├── error        ← Domain exceptions. Thrown only from domain/service.
+  │   ├── repository   ← Data access interfaces. No business rules.
+  │   ├── service      ← Business logic. Currently concrete classes. May evolve to interface + impl
+  │   │                  if multiple implementations or testability needs arise — flag it as a
+  │   │                  question if you see a reason to suggest the change, but never prompt it prematurely.
+  │   └── valueobject  ← Immutable domain value types. No JPA annotations.
+  ├── storage          ← Infrastructure adapters. Implements domain/repository interfaces.
+  │                      Depends on domain — never the reverse. See ADR 0001.
+  └── SigilApplication.java
 
-src/test/java/dev/silentcraft/sigil/
-├── (mirrors main package structure)
-│   ├── api/controller   ← @WebMvcTest slice tests. MockMvc + MockMultipartFile. No full context.
-│   └── domain/service   ← @SpringBootTest + @Testcontainers integration tests. Real PostgreSQL.
-│                          @Transactional on each test — rolls back after every case.
-└── fake/                ← Hand-written fake implementations. No Mockito — see below.
+  src/test/java/dev/silentcraft/sigil/
+  ├── (mirrors main package structure)
+  │   ├── api/controller      ← @WebMvcTest slice tests. MockMvc + MockMultipartFile. No full context.
+  │   ├── domain/service      ← @SpringBootTest + @Testcontainers integration tests. Real PostgreSQL.
+  │   │                          @Transactional on each test — rolls back after every case.
+  │   ├── domain/valueobject  ← Unit tests. No Spring context.
+  │   └── storage             ← Unit and integration tests for infrastructure adapters.
+  └── fake/                   ← Hand-written fake implementations. No Mockito — see below.
 ```
 
 **No Mockito. Ever.**
@@ -170,17 +175,15 @@ organise these?"* When a convention starts to emerge naturally, prompt an ADR to
 **Test method naming:** `methodName_returnsOutcome_whenCondition` — drop `_when` only when the happy path has no
 meaningful condition.
 
-**Dependency direction — the only permitted direction is:**
+**Dependency direction — the only permitted directions are:**
 
 ```
 api → domain
+storage → domain
 ```
 
 The `domain` layer must never import from `api`. It knows nothing about HTTP.
-
-**Open decision — domain exceptions:** where domain-level exceptions are defined has not yet been settled. When a domain
-exception is first needed, flag it: *"This exception originates in the domain — where do you want domain exceptions to
-live?"* and prompt an ADR if the decision isn't self-evident.
+The `domain` layer must never import from `storage`. It knows nothing about Database or the File system.
 
 **Boundary violations — flag these immediately:**
 
@@ -288,53 +291,9 @@ What becomes easier? What becomes harder? What must be remembered?
 
 ---
 
-## Current Progress — Week 2
+## Current Progress — Phase 2 Completed.
 
-### Completed
-
-**Endpoint — `POST /api/v1/documents/`**
-
-- `DocumentControllerTest` — 4 tests green:
-    - `uploadDocument_returnsCreated_whenRequestSuccessful` ✅
-    - `uploadDocument_returns400_whenFileIsEmpty` ✅
-    - `uploadDocument_return400_whenFileNotProvided` ✅
-    - `uploadDocument_returns500_whenFileIsUnreadable` ✅
-- `@RestControllerAdvice` in `api/controller` handling `MissingServletRequestPartException` → 400 and
-  `DocumentReadException` → 500
-- `record SigilErrorResponse` in `api/error`
-
-**Domain layer**
-
-- `DocumentService` wired with real `DocumentRepository` — `store()` persists via `documentRepository.save()` and
-  returns `StoredDocument` with the saved entity's UUID
-- `DocumentProperties` value object in `domain/valueobject` — `from(MultipartFile)` factory method, throws
-  `DocumentReadException` on `IOException`
-- `StoredDocument` value object in `domain/valueobject`
-- `DocumentPropertiesTest` — 2 unit tests green, no Spring context, correct package placement
-- `DocumentReadException` in `domain/error` — moved from api/error to fix dependency direction violation
-- `DocumentServiceIntegrationTest` - testcontainers - store and find methods nominal cases covered
-
-**Fakes**
-
-- `FakeDocumentService` — extends `DocumentService` (concrete subclass, not interface impl)
-- `FakeDocumentRepository` — implements `DocumentRepository`
-- `FakeUnreadableMultipartFile` — extends `MockMultipartFile`, overrides `getBytes()` to throw `IOException`
-- `TestConfig` in `api/controller` — wires fakes for `@WebMvcTest` context
-
-**Infrastructure**
-
-- PostgreSQL 15 via Docker Compose, Liquibase running, `documents` table migrated
-- `actuator/health` returning UP
-
-### Open Questions (surface these at the right moment — do not raise all at once)
-
-- **Boundary issue:**
-- **`FakeDocumentService` extends concrete class:** works now but will become awkward if `DocumentService` grows. First
-  natural signal to discuss extracting an interface. Do not raise until it causes friction.
-- **`toEntity()` in `DocumentService` returns `new Document()`** with no fields set — the `DocumentProperties` data is
-  not yet mapped to the entity. This is the most immediate incomplete piece of Task 2.1.
-
-### Up Next — Phase 2
+## Up next - Phase 3 Task 5.1
 
 ---
 
@@ -357,7 +316,7 @@ What becomes easier? What becomes harder? What must be remembered?
 | 3.1  | Understand AES-GCM — key, IV, auth tag, IV reuse consequences              | ✅      |
 | 3.2  | React upload with Web Crypto encryption — `encryptFile()`                  | ✅      |
 | 4.1  | QR code generation — key in `#` fragment, base64url, never in query params | ✅      |
-| 4.2  | Download + decryption — import key, fetch blob, decrypt, all error cases   |        |
+| 4.2  | Download + decryption — import key, fetch blob, decrypt, all error cases   | ✅      |
 
 ### Phase 3 — Expiry and Revocation (Weeks 5–6)
 
