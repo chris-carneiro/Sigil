@@ -97,6 +97,62 @@ Never put the encryption key in a query parameter, request body, or server log.
 Never use AES-CBC — AES-GCM is authenticated encryption; CBC is not.
 Never reuse an IV — generate a fresh `crypto.getRandomValues(new Uint8Array(12))` per encryption.
 
+**IV placement — load-bearing for the security model:**
+The IV is stored server-side only. It is returned with the encrypted blob on download.
+The IV does NOT live in the QR fragment. Only the raw key lives in the fragment.
+This separation enables future authenticated download endpoints (password, OTP, GPG) where
+an intercepted QR alone cannot decrypt without the server-held IV.
+
+**Metadata confidentiality:**
+Never store fileName or mimeType in plaintext on the server — these leak document intent.
+Filename, mimeType, and any other file metadata must be encrypted inside the blob as an envelope
+before leaving the browser. The server stores and returns opaque bytes only.
+See the Envelope Pattern section below.
+
+---
+
+## Envelope Pattern — Metadata Encryption (read before touching upload or download code)
+
+Filename and mimeType must not travel in cleartext headers or be stored in the database.
+They are encrypted inside the blob using a length-prefixed binary envelope constructed in the browser.
+
+**Envelope format (constructed client-side before encryption):**
+
+```
+[ 4 bytes: metadata length as uint32, big-endian ]
+[ N bytes: UTF-8 JSON — { "fileName": "...", "mimeType": "..." } ]
+[ remaining bytes: original file content ]
+```
+
+**Upload path (browser):**
+1. Build the JSON metadata string
+2. Encode it as UTF-8 bytes
+3. Write a 4-byte big-endian uint32 length prefix into a DataView
+4. Concatenate: [length prefix] + [metadata bytes] + [file bytes] into a single ArrayBuffer
+5. Encrypt the entire buffer with AES-256-GCM — this is what gets uploaded
+
+**Download path (browser):**
+1. Decrypt the blob to recover the raw envelope bytes
+2. Read the first 4 bytes as uint32 to get metadata length
+3. Slice bytes [4 .. 4+metadataLength] and parse as UTF-8 JSON → extract fileName, mimeType
+4. Slice bytes [4+metadataLength ..] as the original file content
+5. Construct `new Blob([fileBytes], { type: mimeType })` and trigger download with fileName
+
+**Server contract:**
+- The download endpoint returns `Content-Type: application/octet-stream` always
+- `Content-Disposition: attachment; filename="document"` — generic, no original filename
+- The `encryption-metadata-iv` response header carries the IV (Base64-encoded)
+- The server has no awareness of the envelope structure — it stores and returns opaque bytes
+
+**Database migration required:**
+- Drop `file_name` and `mime_type` columns from the `documents` table in a Liquibase changeset
+- Remove those fields from `EncryptedDocument`, `StoredDocument`, and any entity that carries them
+- Write the ADR before touching the migration
+
+**Invariant to enforce in review:**
+If any code path on the server reads, stores, or returns fileName or mimeType in plaintext,
+that is a security violation — flag it immediately.
+
 ---
 
 ## Stack
@@ -279,21 +335,26 @@ What becomes easier? What becomes harder? What must be remembered?
 
 ## Key Design Decisions (don't relitigate these — if Chris revisits one, ask why first)
 
-| Decision                                    | Rationale                                                                            |
-|---------------------------------------------|--------------------------------------------------------------------------------------|
-| Liquibase over Flyway                       | Prior familiarity                                                                    |
-| `ErrorResponse` record over `ProblemDetail` | Full API contract ownership — no framework internals leaked                          |
-| `@WebMvcTest` for controller tests          | Avoids loading full context unnecessarily                                            |
-| UUID document IDs                           | Sequential integers allow enumeration attacks                                        |
-| Redis for validity checks                   | O(1) microsecond lookup vs O(log n) millisecond DB query on every download request   |
-| Key in URL fragment                         | Fragment never sent in HTTP requests — architectural guarantee of the security model |
-| No `revoked` boolean column                 | `revoked_at IS NOT NULL` is sufficient; a boolean can drift out of sync              |
+| Decision                                          | Rationale                                                                                                                                                              |
+|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Liquibase over Flyway                             | Prior familiarity                                                                                                                                                      |
+| `ErrorResponse` record over `ProblemDetail`       | Full API contract ownership — no framework internals leaked                                                                                                            |
+| `@WebMvcTest` for controller tests                | Avoids loading full context unnecessarily                                                                                                                              |
+| UUID document IDs                                 | Sequential integers allow enumeration attacks                                                                                                                          |
+| Redis for validity checks                         | O(1) microsecond lookup vs O(log n) millisecond DB query on every download request                                                                                     |
+| Key in URL fragment only                          | Fragment never sent in HTTP requests — architectural guarantee of the security model                                                                                   |
+| IV stored server-side only                        | Intercepted QR alone cannot decrypt without server-held IV — enables future authenticated download gating (password, OTP, GPG)                                        |
+| No `revoked` boolean column                       | `revoked_at IS NOT NULL` is sufficient; a boolean can drift out of sync                                                                                                |
+| Metadata encrypted inside blob (envelope pattern) | Server must not infer document nature from stored metadata. fileName and mimeType travel inside the encrypted envelope only — never in cleartext headers or DB columns |
 
 ---
 
-## Current Progress — Phase 2 Completed.
+## Current Progress — Phase 2 Completed. Envelope refactor pending before Phase 3.
 
-## Up next - Phase 3 Task 5.1
+## Up next
+1. Write ADR for the envelope pattern decision
+2. Envelope refactor — drop `file_name`/`mime_type` from DB, update value objects, update client upload and download paths
+3. Phase 3 Task 5.1 — Redis validity cache
 
 ---
 
@@ -317,6 +378,7 @@ What becomes easier? What becomes harder? What must be remembered?
 | 3.2  | React upload with Web Crypto encryption — `encryptFile()`                  | ✅      |
 | 4.1  | QR code generation — key in `#` fragment, base64url, never in query params | ✅      |
 | 4.2  | Download + decryption — import key, fetch blob, decrypt, all error cases   | ✅      |
+| 4.3  | Envelope refactor — metadata encrypted inside blob, drop DB columns        | ⏳      |
 
 ### Phase 3 — Expiry and Revocation (Weeks 5–6)
 
