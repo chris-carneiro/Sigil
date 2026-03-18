@@ -50,7 +50,7 @@ public class DocumentService {
                             return new StoredDocument(blobStorage.read(documentPath),
                                     document.iv(),
                                     document.fileName(),
-                                    null);
+                                    document.mimeType());
                         }
                 )
                 .orElseThrow(DocumentNotFoundException::new);
@@ -60,6 +60,7 @@ public class DocumentService {
         String blobPath = "%s/%s".formatted(locationPath, fileId);
         return new Document(fileId,
                 properties.fileName(),
+                properties.mimeType(),
                 blobPath,
                 properties.fileSize(),
                 properties.fileIv()
