@@ -83,7 +83,6 @@ function App() {
         const contentDisposition = response.headers.get("content-disposition");
         const fileNameValue = contentDisposition.substring(contentDisposition.lastIndexOf("=") + 1).replaceAll('"', '');
 
-        // console.log("content Disposition", fileNameValue);
         const blobUrl = URL.createObjectURL(new Blob([plainText]));
 
         const downloadLink = document.createElement("a");

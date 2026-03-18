@@ -15,9 +15,9 @@ export default async function encrypt(file) {
 
 export async function decrypt(bytes, key, iv) {
 
-    const cryptKey = await crypto.subtle.importKey("raw", key, { name: 'AES-GCM' }, false, ["decrypt"]);
+    const cryptoKey = await crypto.subtle.importKey("raw", key, { name: 'AES-GCM' }, false, ["decrypt"]);
 
-    const plainText = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptKey, bytes);
+    const plainText = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, bytes);
     return plainText;
 }
 

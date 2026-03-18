@@ -11,7 +11,7 @@ class EncryptedDocumentTest {
     @Test
     void fileSize_returnsFileSize_whenBlobIsNotEmpty() {
         //GIVEN
-        EncryptedDocument properties = new EncryptedDocument("small.file", "four".getBytes(StandardCharsets.UTF_8), "".getBytes(StandardCharsets.UTF_8));
+        EncryptedDocument properties = new EncryptedDocument("small.file", "text/plain", "four".getBytes(StandardCharsets.UTF_8), "".getBytes(StandardCharsets.UTF_8));
 
         //WHEN
         var result = properties.fileSize();

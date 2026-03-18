@@ -41,7 +41,7 @@ public class DocumentController {
             throw new InvalidDocumentException(InvalidDocumentException.EMPTY_DOCUMENT);
         }
 
-        DocumentIdentity documentIdentity = documentService.store(new EncryptedDocument(document.getOriginalFilename(), document.getBytes(), fileIv.getBytes()));
+        DocumentIdentity documentIdentity = documentService.store(new EncryptedDocument(document.getOriginalFilename(), document.getContentType(), document.getBytes(), fileIv.getBytes()));
 
         UUID documentId = documentIdentity.id();
         URI location = URI.create("/api/v1/documents/" + documentId);
