@@ -62,34 +62,54 @@ function App() {
 
   useEffect(() => {
     async function downloadDocument() {
-      const [documentId, key] = parseMetadata();
-      if (documentId) {
-        const response = await fetch('/api/v1/documents/' + documentId, {
-          method: 'GET'
-        });
+      try {
+        const [documentId, key] = parseMetadata();
+        if (documentId) {
+          const response = await fetch('/api/v1/documents/' + documentId, {
+            method: 'GET'
+          });
 
-        if (!response.ok) {
-          throw Error("The encrypted document could not be fetched");
+          if (!response.ok) {
+            throw Error("The encrypted document could not be fetched");
+          }
+
+          const encryptedBytes = await response.arrayBuffer();
+          const iv = response.headers.get("encryption-metadata-iv");
+          const decodedKey = Uint8Array.fromBase64(key, { alphabet: "base64url", omitPadding: true });
+          const decodedIv = Uint8Array.fromBase64(iv);
+          const plainText = await decrypt(encryptedBytes, decodedKey, decodedIv);
+
+          // console.log("decrypted text=", new TextDecoder().decode(plainText));
+
+          const contentDisposition = response.headers.get("content-disposition");
+
+          let fileNameValue = "unknown";
+          const searchKey = "filename=";
+
+          if (contentDisposition && contentDisposition.includes(searchKey)) {
+            fileNameValue = contentDisposition.substring(contentDisposition.search(searchKey) + searchKey.length).replaceAll('"', '');
+          }
+
+          const blobUrl = URL.createObjectURL(new Blob([plainText]));
+
+          const downloadLink = document.createElement("a");
+          downloadLink.href = blobUrl;
+          downloadLink.download = fileNameValue;
+          downloadLink.click();
+          URL.revokeObjectURL(blobUrl);
+        }
+      } catch (e) {
+        if (e instanceof TypeError) {
+          setError("The server returned invalid data, the document could not be recovered");
+          return;
         }
 
-        const encryptedBytes = await response.arrayBuffer();
-        const iv = response.headers.get("encryption-metadata-iv");
-        const decodedKey = Uint8Array.fromBase64(key, { alphabet: "base64url", omitPadding: true });
-        const decodedIv = Uint8Array.fromBase64(iv);
-        const plainText = await decrypt(encryptedBytes, decodedKey, decodedIv);
+        if (e instanceof DOMException && e.name === "OperationError") {
+          setError("The document could not be recovered using the provided cryptographic properties");
+          return;
+        }
 
-        // console.log("decrypted text=", new TextDecoder().decode(plainText));
-
-        const contentDisposition = response.headers.get("content-disposition");
-        const fileNameValue = contentDisposition.substring(contentDisposition.lastIndexOf("=") + 1).replaceAll('"', '');
-
-        const blobUrl = URL.createObjectURL(new Blob([plainText]));
-
-        const downloadLink = document.createElement("a");
-        downloadLink.href = blobUrl;
-        downloadLink.download = fileNameValue;
-        downloadLink.click();
-        URL.revokeObjectURL(blobUrl);
+        setError(e.message ? e.message : "An unhandled error occured=" + e.constructor.name);
       }
     }
 
