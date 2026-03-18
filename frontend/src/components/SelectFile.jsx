@@ -8,7 +8,10 @@ function SelectFile({ onFileSelected }) {
     return (
         <div>
             <input type="file" onChange={e => setFile(e.target.files[0])} />
-            <input type="button" onClick={() => onFileSelected(file)} value="Upload" />
+            <input type="button" onClick={() => {
+                console.log("path", window.location.pathname);
+                onFileSelected(file)
+            }} value="Upload" />
         </div>
     );
 }
