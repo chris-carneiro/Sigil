@@ -69,7 +69,7 @@ function App() {
         });
 
         if (!response.ok) {
-          throw Error("The encrypted document could not be fetched")
+          throw Error("The encrypted document could not be fetched");
         }
 
         const encryptedBytes = await response.arrayBuffer();
@@ -78,13 +78,23 @@ function App() {
         const decodedIv = Uint8Array.fromBase64(iv);
         const plainText = await decrypt(encryptedBytes, decodedKey, decodedIv);
 
-        console.log("decrypted text=", new TextDecoder().decode(plainText));
-        return response
+        // console.log("decrypted text=", new TextDecoder().decode(plainText));
+
+        const contentDisposition = response.headers.get("content-disposition");
+        const fileNameValue = contentDisposition.substring(contentDisposition.lastIndexOf("=") + 1).replaceAll('"', '');
+
+        // console.log("content Disposition", fileNameValue);
+        const blobUrl = URL.createObjectURL(new Blob([plainText]));
+
+        const downloadLink = document.createElement("a");
+        downloadLink.href = blobUrl;
+        downloadLink.download = fileNameValue;
+        downloadLink.click();
+        URL.revokeObjectURL(blobUrl);
       }
     }
 
     downloadDocument();
-
   }, []);
 
 
