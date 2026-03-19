@@ -1,16 +1,14 @@
 
-export default async function encrypt(file) {
-    const plainText = await file.arrayBuffer();
+export default async function encrypt(envelope) {
     const cryptoKey = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
     const rawKey = await crypto.subtle.exportKey("raw", cryptoKey);
 
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const cipherText = await crypto.subtle.encrypt({ name: 'AES-GCM', iv },
-        cryptoKey, plainText);
+        cryptoKey, envelope);
 
 
     return { cipherText, rawKey, iv }
-
 }
 
 export async function decrypt(bytes, key, iv) {

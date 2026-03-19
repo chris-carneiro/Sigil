@@ -6,16 +6,58 @@ import './secure/encryption'
 import { QRCodeSVG } from 'qrcode.react';
 import sigilLogo from './assets/sigil_mark.svg';
 
-
 function App() {
   const [qrCodeUrl, setQRCodeUrl] = useState(null);
   const [hasError, setError] = useState(null);
 
+
+  async function buildEnvelope(file) {
+    const headerLength = 4;
+    const metadata = JSON.stringify({ "fileName": file.name, "mimeType": file.type });
+
+    const jsonMetadata = buildJsonMetadata();
+    const fileBytes = await buildFileBytes();
+    const header = buildHeader(jsonMetadata.length);
+
+    // building envelope
+    const envelopeLength = headerLength + jsonMetadata.length + fileBytes.length;
+    const envelope = new Uint8Array(envelopeLength);
+
+    envelope.set(header);
+    envelope.set(jsonMetadata, headerLength);
+    envelope.set(fileBytes, headerLength + jsonMetadata.length);
+
+    return envelope;
+
+    async function buildFileBytes() {
+      const fileBuffer = await file.arrayBuffer();
+      const fileBytes = new Uint8Array(fileBuffer);
+      return fileBytes;
+    }
+
+    function buildJsonMetadata() {
+      const textEncoder = new TextEncoder();
+      const jsonMetadata = textEncoder.encode(metadata);
+      return jsonMetadata;
+    }
+
+    function buildHeader(metadataLength) {
+      const headerBuffer = new ArrayBuffer(4);
+      const view = new DataView(headerBuffer);
+      view.setUint32(0, metadataLength);
+      const header = new Uint8Array(headerBuffer);
+      return header;
+    }
+  }
+
   async function handleFile(file) {
-    const { cipherText, rawKey, iv } = await encrypt(file);
+
+    const envelope = await buildEnvelope(file);
+    const { cipherText, rawKey, iv } = await encrypt(envelope);
 
     const formData = new FormData();
-    formData.append("document", new Blob([cipherText], { type: file.type }), file.name);
+
+    formData.append("document", new Blob([cipherText], { type: "application/octet-stream" }));
     formData.append("iv", new Blob([iv], { type: "application/octet-stream" }));
 
     try {
@@ -23,8 +65,6 @@ function App() {
         method: 'POST',
         body: formData
       });
-
-
 
       if (!response.ok) {
         throw Error("The encrypted document could not be stored")
@@ -42,7 +82,6 @@ function App() {
       }
       setError(e.message)
     }
-
   }
 
   function parseMetadata() {
@@ -54,16 +93,16 @@ function App() {
       const pathEnd = path.lastIndexOf("/");
       const documentId = path.substring(pathEnd + 1);
       const key = fragment.substring(fragment.lastIndexOf('#') + 1);
-      return [documentId, key];
+      return {documentId, key};
     }
 
-    return [];
+    return {};
   }
 
   useEffect(() => {
     async function downloadDocument() {
       try {
-        const [documentId, key] = parseMetadata();
+        const {documentId, key} = parseMetadata();
         if (documentId) {
           const response = await fetch('/api/v1/documents/' + documentId, {
             method: 'GET'
@@ -77,24 +116,15 @@ function App() {
           const iv = response.headers.get("encryption-metadata-iv");
           const decodedKey = Uint8Array.fromBase64(key, { alphabet: "base64url", omitPadding: true });
           const decodedIv = Uint8Array.fromBase64(iv);
-          const plainText = await decrypt(encryptedBytes, decodedKey, decodedIv);
+          const envelop = await decrypt(encryptedBytes, decodedKey, decodedIv);
 
-          // console.log("decrypted text=", new TextDecoder().decode(plainText));
+          const {jsonMetadata, fileBytes} = splitEnvelope(envelop);
 
-          const contentDisposition = response.headers.get("content-disposition");
-
-          let fileNameValue = "unknown";
-          const searchKey = "filename=";
-
-          if (contentDisposition && contentDisposition.includes(searchKey)) {
-            fileNameValue = contentDisposition.substring(contentDisposition.search(searchKey) + searchKey.length).replaceAll('"', '');
-          }
-
-          const blobUrl = URL.createObjectURL(new Blob([plainText]));
+          const blobUrl = URL.createObjectURL(new Blob([fileBytes], { type: jsonMetadata.mimeType }));
 
           const downloadLink = document.createElement("a");
           downloadLink.href = blobUrl;
-          downloadLink.download = fileNameValue;
+          downloadLink.download = jsonMetadata.fileName;
           downloadLink.click();
           URL.revokeObjectURL(blobUrl);
         }
@@ -110,6 +140,27 @@ function App() {
         }
 
         setError(e.message ? e.message : "An unhandled error occured=" + e.constructor.name);
+      }
+
+      function splitEnvelope(decryptedEnvelope) {
+        try {
+          const metadataStartIndex = 4;
+          const envelopeBytes = new Uint8Array(decryptedEnvelope);
+          const metadataLength = envelopeBytes.subarray(0, metadataStartIndex);
+
+          // extracts metadata array length as integer value.
+          const metadataSize = new DataView(metadataLength.buffer, metadataLength.byteOffset, metadataLength.byteLength).getUint32(0);
+          const metadataEndIndex = metadataStartIndex + metadataSize;
+
+          const jsonBytes = envelopeBytes.subarray(metadataStartIndex, metadataEndIndex);
+          const jsonMetadata = JSON.parse(new TextDecoder().decode(jsonBytes));
+
+          const fileBytes = envelopeBytes.subarray(metadataEndIndex);
+
+          return {jsonMetadata, fileBytes};
+        } catch (e) {
+          console.log("Error spliting envelope", e);
+        }
       }
     }
 
