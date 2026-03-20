@@ -15,6 +15,22 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  sigil_cache:
+    image: redis:8.6-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test : ['CMD-SHELL', 'redis-cli -a $$REDIS_PASSWORD ping']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - sigil_cache:/data
+
   app:
     build: .
     ports:
@@ -22,13 +38,20 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      sigil_cache:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: sigil_cache
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+
 
 volumes:
   postgres_data:
+  sigil_cache:
+    driver: local
 
 
 
