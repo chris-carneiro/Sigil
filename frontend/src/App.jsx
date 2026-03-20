@@ -12,6 +12,11 @@ function App() {
 
 
   async function buildEnvelope(file) {
+
+    if (!isAscii(file)) {
+      throw new Error("The file name format is not supported, use only alphanumeric charaters");
+    }
+
     const headerLength = 4;
     const metadata = JSON.stringify({ "fileName": file.name, "mimeType": file.type });
 
@@ -28,6 +33,10 @@ function App() {
     envelope.set(fileBytes, headerLength + jsonMetadata.length);
 
     return envelope;
+
+    function isAscii(file) {
+      return new TextEncoder().encode(file.name).length == file.name.length;
+    }
 
     async function buildFileBytes() {
       const fileBuffer = await file.arrayBuffer();
@@ -51,16 +60,17 @@ function App() {
   }
 
   async function handleFile(file) {
-
-    const envelope = await buildEnvelope(file);
-    const { cipherText, rawKey, iv } = await encrypt(envelope);
-
-    const formData = new FormData();
-
-    formData.append("document", new Blob([cipherText], { type: "application/octet-stream" }));
-    formData.append("iv", new Blob([iv], { type: "application/octet-stream" }));
-
+    if (!file || !file.name) return;
     try {
+      const envelope = await buildEnvelope(file);
+      const { cipherText, rawKey, iv } = await encrypt(envelope);
+
+      const formData = new FormData();
+
+      formData.append("document", new Blob([cipherText], { type: "application/octet-stream" }));
+      formData.append("iv", new Blob([iv], { type: "application/octet-stream" }));
+
+
       const response = await fetch('/api/v1/documents', {
         method: 'POST',
         body: formData
@@ -93,7 +103,7 @@ function App() {
       const pathEnd = path.lastIndexOf("/");
       const documentId = path.substring(pathEnd + 1);
       const key = fragment.substring(fragment.lastIndexOf('#') + 1);
-      return {documentId, key};
+      return { documentId, key };
     }
 
     return {};
@@ -102,7 +112,7 @@ function App() {
   useEffect(() => {
     async function downloadDocument() {
       try {
-        const {documentId, key} = parseMetadata();
+        const { documentId, key } = parseMetadata();
         if (documentId) {
           const response = await fetch('/api/v1/documents/' + documentId, {
             method: 'GET'
@@ -118,7 +128,7 @@ function App() {
           const decodedIv = Uint8Array.fromBase64(iv);
           const envelop = await decrypt(encryptedBytes, decodedKey, decodedIv);
 
-          const {jsonMetadata, fileBytes} = splitEnvelope(envelop);
+          const { jsonMetadata, fileBytes } = splitEnvelope(envelop);
 
           const blobUrl = URL.createObjectURL(new Blob([fileBytes], { type: jsonMetadata.mimeType }));
 
@@ -157,7 +167,7 @@ function App() {
 
           const fileBytes = envelopeBytes.subarray(metadataEndIndex);
 
-          return {jsonMetadata, fileBytes};
+          return { jsonMetadata, fileBytes };
         } catch (e) {
           console.log("Error spliting envelope", e);
         }
