@@ -21,3 +21,6 @@ sigil:
   document:
     location:
       path: ${SIGIL_STORAGE_PATH:${user.home}/.sigil/private/documents}
+  defaults:
+    document:
+      validity-days: 7

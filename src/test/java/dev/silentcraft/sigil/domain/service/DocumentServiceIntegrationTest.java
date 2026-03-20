@@ -4,10 +4,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.data.TemporalUnitWithinOffset;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -44,6 +47,8 @@ class DocumentServiceIntegrationTest {
     @TempDir
     private static Path tempDir;
 
+    private static final Long TEST_VALIDITY_DAYS = 6L;
+
     @Container
     private static PostgreSQLContainer<?> postgresDB = new PostgreSQLContainer<>("postgres:15.17")
             .withDatabaseName("test-sigil-db")
@@ -52,11 +57,12 @@ class DocumentServiceIntegrationTest {
 
 
     @DynamicPropertySource
-    static void setPostgresDB(DynamicPropertyRegistry registry) {
+    static void setApplicationProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgresDB::getJdbcUrl);
         registry.add("spring.datasource.username", postgresDB::getUsername);
         registry.add("spring.datasource.password", postgresDB::getPassword);
         registry.add("sigil.document.location.path", () -> tempDir.toString());
+        registry.add("sigil.defaults.document.validity-days", () -> TEST_VALIDITY_DAYS);
     }
 
     @Test
@@ -91,7 +97,7 @@ class DocumentServiceIntegrationTest {
         // GIVEN
         final UUID revokedDocumentId = UUID.randomUUID();
         Document revokedDocument = new Document(revokedDocumentId, "path",
-                "iv".getBytes(StandardCharsets.UTF_8), Instant.parse("2025-12-03T10:15:30.00Z"));
+                "iv".getBytes(StandardCharsets.UTF_8), Instant.parse("2026-12-03T10:15:30.00Z"), Instant.parse("2025-12-03T10:15:30.00Z"));
         documentRepository.save(revokedDocument);
 
 
@@ -112,6 +118,22 @@ class DocumentServiceIntegrationTest {
         // THEN
         Assertions.assertThat(Files.exists(Paths.get(result.blobPath()))).isTrue();
         Assertions.assertThat(result.identity()).isEqualTo(identity.id());
+    }
+
+    @Test
+    void store_setsDefaultDocumentExpirationDate_whenSuccessful() {
+        // GIVEN
+        EncryptedDocument encryptedDocument = new EncryptedDocument("test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
+        TemporalUnitWithinOffset withAcceptableOffset = new TemporalUnitWithinOffset(2, ChronoUnit.MINUTES);
+        DocumentIdentity documentIdentity = documentService.store(encryptedDocument);
+
+        // WHEN
+        Document result = documentRepository.findById(documentIdentity.id()).orElseThrow();
+
+
+        // THEN
+        Instant validityPeriod = Instant.now().plus(Duration.of(TEST_VALIDITY_DAYS, ChronoUnit.DAYS));
+        Assertions.assertThat(result.expiresAt()).isCloseTo(validityPeriod, withAcceptableOffset);
     }
 
 }

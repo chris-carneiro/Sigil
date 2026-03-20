@@ -18,21 +18,25 @@ public class Document {
     @Column(name = "iv")
     private byte[] fileIv;
     private Instant revokedAt;
+    private Instant expiresAt;
+
 
     private Document() {
     }
 
-    public Document(UUID documentId, String blobPath, byte[] fileIv, Instant revokedAt) {
-        byte[] iv = Objects.requireNonNull(fileIv, "Document entity - Iv column cannot be null");
+    public Document(UUID documentId, String blobPath, byte[] fileIv, Instant expiresAt, Instant revokedAt) {
+        byte[] iv = Objects.requireNonNull(fileIv, "Document entity - Iv field cannot be null");
+
 
         this.documentId = documentId;
         this.blobPath = blobPath;
         this.fileIv = Arrays.copyOf(iv, fileIv.length);
         this.revokedAt = revokedAt;
+        this.expiresAt = Objects.requireNonNull(expiresAt, "Document entity - expiresAt field cannot be null");
     }
 
-    public Document(UUID documentId, String blobPath, byte[] fileIv) {
-        this(documentId, blobPath, fileIv, null);
+    public Document(UUID documentId, String blobPath, byte[] fileIv, Instant expiresAt) {
+        this(documentId, blobPath, fileIv, expiresAt, null);
     }
 
     public UUID identity() {
@@ -53,5 +57,9 @@ public class Document {
 
     public boolean isRevoked() {
         return Objects.nonNull(revokedAt);
+    }
+
+    public Instant expiresAt() {
+        return expiresAt;
     }
 }

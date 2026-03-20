@@ -1,6 +1,9 @@
 package dev.silentcraft.sigil.domain.service;
 
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -20,14 +23,18 @@ import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
 public class DocumentService {
 
     private final Path locationPath;
+    private final Duration documentValidityDays;
 
     private final DocumentRepository documentRepository;
     private final BlobStorage blobStorage;
 
     public DocumentService(DocumentRepository documentRepository,
-                           @Value("${sigil.document.location.path}") String locationPath, BlobStorage blobStorage) {
+                           @Value("${sigil.document.location.path}") String locationPath,
+                           @Value("${sigil.defaults.document.validity-days}") Long documentValidityDays,
+                           BlobStorage blobStorage) {
         this.locationPath = Path.of(locationPath).normalize().toAbsolutePath();
         this.documentRepository = documentRepository;
+        this.documentValidityDays = Duration.of(documentValidityDays, ChronoUnit.DAYS);
         this.blobStorage = blobStorage;
     }
 
@@ -59,7 +66,8 @@ public class DocumentService {
         String blobPath = "%s/%s".formatted(locationPath, fileId);
         return new Document(fileId,
                 blobPath,
-                properties.fileIv()
+                properties.fileIv(),
+                Instant.now().plus(documentValidityDays)
         );
     }
 }
