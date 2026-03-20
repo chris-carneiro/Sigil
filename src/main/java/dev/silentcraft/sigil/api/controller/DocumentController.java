@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.Base64;
 import java.util.UUID;
 
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,12 +51,9 @@ public class DocumentController {
     @GetMapping("/{documentId}")
     public ResponseEntity<byte[]> downloadDocument(@PathVariable UUID documentId) {
         StoredDocument storedDocument = documentService.find(documentId);
-//        TODO ContentDisposition.builder("attachment").filename(storedDocument.fileName(), Charset.forName(storedDocument.mimeType()));
-        ContentDisposition attachment = ContentDisposition.builder("attachment").build();
         return ResponseEntity.ok()
                 .header("encryption-metadata-iv", Base64.getEncoder().encodeToString(storedDocument.iv()))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                .header(HttpHeaders.CONTENT_DISPOSITION, attachment.toString())
                 .body(storedDocument.encryptedBlob());
     }
 }

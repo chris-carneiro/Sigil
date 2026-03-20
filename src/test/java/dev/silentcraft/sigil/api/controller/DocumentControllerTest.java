@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -128,7 +127,6 @@ class DocumentControllerTest {
         mockMvc.perform(get(documentResource))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("encryption-metadata-iv"))
-                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment"))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
     }
 
