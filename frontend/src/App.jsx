@@ -12,13 +12,17 @@ function App() {
 
 
   async function buildEnvelope(file) {
-
     if (!isAscii(file)) {
-      throw new Error("The file name format is not supported, use only alphanumeric charaters");
+      throw new Error("The file name format is not supported, use only alphanumeric characters");
+    }
+
+    const fileNameLimit = 255;
+    if (file.name.length > fileNameLimit) {
+      throw new Error("The file name is too long > " + fileNameLimit);
     }
 
     const headerLength = 4;
-    const metadata = JSON.stringify({ "fileName": file.name, "mimeType": file.type });
+    const metadata = JSON.stringify({ "fileName": file.name, "mimeType": file.type || "application/octet-stream" });
 
     const jsonMetadata = buildJsonMetadata();
     const fileBytes = await buildFileBytes();
@@ -62,6 +66,9 @@ function App() {
   async function handleFile(file) {
     if (!file || !file.name) return;
     try {
+      const fileSizeLimit = 10000000;
+      if (file.size > fileSizeLimit) throw new Error("File is too large");
+
       const envelope = await buildEnvelope(file);
       const { cipherText, rawKey, iv } = await encrypt(envelope);
 
@@ -161,6 +168,7 @@ function App() {
           // extracts metadata array length as integer value.
           const metadataSize = new DataView(metadataLength.buffer, metadataLength.byteOffset, metadataLength.byteLength).getUint32(0);
           const metadataEndIndex = metadataStartIndex + metadataSize;
+          if (metadataEndIndex > envelopeBytes.length) throw new Error("Envelope format violation detected");
 
           const jsonBytes = envelopeBytes.subarray(metadataStartIndex, metadataEndIndex);
           const jsonMetadata = JSON.parse(new TextDecoder().decode(jsonBytes));
@@ -169,7 +177,8 @@ function App() {
 
           return { jsonMetadata, fileBytes };
         } catch (e) {
-          console.log("Error spliting envelope", e);
+
+          throw new Error(e.message || "Error spliting envelope");
         }
       }
     }
