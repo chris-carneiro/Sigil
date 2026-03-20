@@ -125,6 +125,7 @@ They are encrypted inside the blob using a length-prefixed binary envelope const
 ```
 
 **Upload path (browser):**
+
 1. Build the JSON metadata string
 2. Encode it as UTF-8 bytes
 3. Write a 4-byte big-endian uint32 length prefix into a DataView
@@ -132,6 +133,7 @@ They are encrypted inside the blob using a length-prefixed binary envelope const
 5. Encrypt the entire buffer with AES-256-GCM — this is what gets uploaded
 
 **Download path (browser):**
+
 1. Decrypt the blob to recover the raw envelope bytes
 2. Read the first 4 bytes as uint32 to get metadata length
 3. Slice bytes [4 .. 4+metadataLength] and parse as UTF-8 JSON → extract fileName, mimeType
@@ -139,12 +141,14 @@ They are encrypted inside the blob using a length-prefixed binary envelope const
 5. Construct `new Blob([fileBytes], { type: mimeType })` and trigger download with fileName
 
 **Server contract:**
+
 - The download endpoint returns `Content-Type: application/octet-stream` always
 - `Content-Disposition: attachment; filename="document"` — generic, no original filename
 - The `encryption-metadata-iv` response header carries the IV (Base64-encoded)
 - The server has no awareness of the envelope structure — it stores and returns opaque bytes
 
 **Database migration required:**
+
 - Drop `file_name` and `mime_type` columns from the `documents` table in a Liquibase changeset
 - Remove those fields from `EncryptedDocument`, `StoredDocument`, and any entity that carries them
 - Write the ADR before touching the migration
@@ -343,7 +347,7 @@ What becomes easier? What becomes harder? What must be remembered?
 | UUID document IDs                                 | Sequential integers allow enumeration attacks                                                                                                                          |
 | Redis for validity checks                         | O(1) microsecond lookup vs O(log n) millisecond DB query on every download request                                                                                     |
 | Key in URL fragment only                          | Fragment never sent in HTTP requests — architectural guarantee of the security model                                                                                   |
-| IV stored server-side only                        | Intercepted QR alone cannot decrypt without server-held IV — enables future authenticated download gating (password, OTP, GPG)                                        |
+| IV stored server-side only                        | Intercepted QR alone cannot decrypt without server-held IV — enables future authenticated download gating (password, OTP, GPG)                                         |
 | No `revoked` boolean column                       | `revoked_at IS NOT NULL` is sufficient; a boolean can drift out of sync                                                                                                |
 | Metadata encrypted inside blob (envelope pattern) | Server must not infer document nature from stored metadata. fileName and mimeType travel inside the encrypted envelope only — never in cleartext headers or DB columns |
 
@@ -352,8 +356,10 @@ What becomes easier? What becomes harder? What must be remembered?
 ## Current Progress — Phase 2 Completed. Envelope refactor pending before Phase 3.
 
 ## Up next
+
 1. Write ADR for the envelope pattern decision
-2. Envelope refactor — drop `file_name`/`mime_type` from DB, update value objects, update client upload and download paths
+2. Envelope refactor — drop `file_name`/`mime_type` from DB, update value objects, update client upload and download
+   paths
 3. Phase 3 Task 5.1 — Redis validity cache
 
 ---
@@ -378,14 +384,14 @@ What becomes easier? What becomes harder? What must be remembered?
 | 3.2  | React upload with Web Crypto encryption — `encryptFile()`                  | ✅      |
 | 4.1  | QR code generation — key in `#` fragment, base64url, never in query params | ✅      |
 | 4.2  | Download + decryption — import key, fetch blob, decrypt, all error cases   | ✅      |
-| 4.3  | Envelope refactor — metadata encrypted inside blob, drop DB columns        | ⏳      |
+| 4.3  | Envelope refactor — metadata encrypted inside blob, drop DB columns        | ✅      |
 
 ### Phase 3 — Expiry and Revocation (Weeks 5–6)
 
-| Task | Description                                                                           |
-|------|---------------------------------------------------------------------------------------|
-| 5.1  | Redis validity cache — `doc:valid:{uuid}` with TTL, O(1) `isValid`, revoke via DELETE |
-| 5.2  | Revocation endpoint — Redis invalidation + durable PostgreSQL record                  |
+| Task | Description                                                                           | Status |
+|------|---------------------------------------------------------------------------------------|--------|
+| 5.1  | Redis validity cache — `doc:valid:{uuid}` with TTL, O(1) `isValid`, revoke via DELETE | ⏳      | 
+| 5.2  | Revocation endpoint — Redis invalidation + durable PostgreSQL record                  |        |
 
 ### Phase 4 — CI/CD (Weeks 7–8)
 
