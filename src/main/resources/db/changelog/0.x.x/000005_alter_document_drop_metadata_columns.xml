@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="000005" author="cca"
+               logicalFilePath="/db/changelog/0.x.x/000005_alter_document_drop_metadata_columns.xml">
+        <dropColumn tableName="document">
+            <column name="file_name"/>
+            <column name="mime_type"/>
+            <column name="file_size"/>
+        </dropColumn>
+    </changeSet>
+</databaseChangeLog>

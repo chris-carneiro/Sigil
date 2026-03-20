@@ -2,7 +2,7 @@ package dev.silentcraft.sigil.domain.valueobject;
 
 import java.util.Arrays;
 
-public record EncryptedDocument(String fileName, String mimeType, byte[] encryptedFile, byte[] fileIv) {
+public record EncryptedDocument(byte[] encryptedFile, byte[] fileIv) {
 
     public EncryptedDocument {
         encryptedFile = Arrays.copyOf(encryptedFile, encryptedFile.length);

@@ -41,7 +41,7 @@ public class DocumentController {
             throw new InvalidDocumentException(InvalidDocumentException.EMPTY_DOCUMENT);
         }
 
-        DocumentIdentity documentIdentity = documentService.store(new EncryptedDocument(document.getOriginalFilename(), document.getContentType(), document.getBytes(), fileIv.getBytes()));
+        DocumentIdentity documentIdentity = documentService.store(new EncryptedDocument(document.getBytes(), fileIv.getBytes()));
 
         UUID documentId = documentIdentity.id();
         URI location = URI.create("/api/v1/documents/" + documentId);
@@ -53,7 +53,7 @@ public class DocumentController {
     public ResponseEntity<byte[]> downloadDocument(@PathVariable UUID documentId) {
         StoredDocument storedDocument = documentService.find(documentId);
 //        TODO ContentDisposition.builder("attachment").filename(storedDocument.fileName(), Charset.forName(storedDocument.mimeType()));
-        ContentDisposition attachment = ContentDisposition.builder("attachment").filename(storedDocument.fileName()).build();
+        ContentDisposition attachment = ContentDisposition.builder("attachment").build();
         return ResponseEntity.ok()
                 .header("encryption-metadata-iv", Base64.getEncoder().encodeToString(storedDocument.iv()))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)

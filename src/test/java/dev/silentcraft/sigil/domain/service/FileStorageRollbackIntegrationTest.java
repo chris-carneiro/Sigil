@@ -59,7 +59,7 @@ public class FileStorageRollbackIntegrationTest {
 
         // GIVEN
         try {
-            EncryptedDocument document = new EncryptedDocument("aFile.txt", "text/plain", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
+            EncryptedDocument document = new EncryptedDocument("test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
             documentService.store(document);
         } catch (BlobStorageException ex) {
             // WHEN

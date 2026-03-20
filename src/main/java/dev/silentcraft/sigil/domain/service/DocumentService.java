@@ -48,9 +48,8 @@ public class DocumentService {
                             }
                             Path documentPath = Path.of(document.blobPath());
                             return new StoredDocument(blobStorage.read(documentPath),
-                                    document.iv(),
-                                    document.fileName(),
-                                    document.mimeType());
+                                    document.iv()
+                            );
                         }
                 )
                 .orElseThrow(DocumentNotFoundException::new);
@@ -59,10 +58,7 @@ public class DocumentService {
     private Document toEntity(EncryptedDocument properties, UUID fileId) {
         String blobPath = "%s/%s".formatted(locationPath, fileId);
         return new Document(fileId,
-                properties.fileName(),
-                properties.mimeType(),
                 blobPath,
-                properties.fileSize(),
                 properties.fileIv()
         );
     }
