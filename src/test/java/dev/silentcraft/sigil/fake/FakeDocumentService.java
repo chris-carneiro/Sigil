@@ -1,6 +1,7 @@
 package dev.silentcraft.sigil.fake;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -20,7 +21,7 @@ public class FakeDocumentService extends DocumentService {
     public static final String FAKE_REVOKED_DOCUMENT_ID = "00000000-0000-0000-0000-000000000002";
     public static final UUID FAKE_DOCUMENT_UUID = UUID.fromString(FAKE_DOCUMENT_ID);
     public static final UUID FAKE_REVOKED_DOCUMENT_UUID = UUID.fromString(FAKE_REVOKED_DOCUMENT_ID);
-    private static final String TRIGGER_BLOB_STORAGE_EXCEPTION = "trigger_BlobStorageException";
+    private static final byte[] TRIGGER_BLOB_STORAGE_EXCEPTION = "trigger_BlobStorageException".getBytes(StandardCharsets.UTF_8);
 
     public FakeDocumentService(DocumentRepository documentRepository, BlobStorage blobStorage) {
         super(documentRepository, "", blobStorage);
@@ -28,7 +29,7 @@ public class FakeDocumentService extends DocumentService {
 
     @Override
     public DocumentIdentity store(EncryptedDocument encryptedDocument) {
-        if (Objects.equals(TRIGGER_BLOB_STORAGE_EXCEPTION, encryptedDocument.fileName())) {
+        if (Arrays.equals(TRIGGER_BLOB_STORAGE_EXCEPTION, encryptedDocument.encryptedFile())) {
             throw new BlobStorageException(BlobStorageException.CANT_STORE_DOCUMENT);
         }
         return new DocumentIdentity(FAKE_DOCUMENT_UUID);
@@ -39,9 +40,7 @@ public class FakeDocumentService extends DocumentService {
         if (Objects.equals(identity, FAKE_DOCUMENT_UUID)) {
             return new StoredDocument(
                     "encryptedBlob".getBytes(StandardCharsets.UTF_8),
-                    "iv".getBytes(StandardCharsets.UTF_8),
-                    "fileName",
-                    "mimeType"
+                    "iv".getBytes(StandardCharsets.UTF_8)
             );
         }
 

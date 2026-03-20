@@ -14,10 +14,7 @@ public class Document {
 
     @Id
     private UUID documentId;
-    private String fileName;
-    private String mimeType;
     private String blobPath;
-    private Long fileSize;
     @Column(name = "iv")
     private byte[] fileIv;
     private Instant revokedAt;
@@ -25,36 +22,25 @@ public class Document {
     private Document() {
     }
 
-    public Document(UUID documentId, String fileName, String mimeType, String blobPath, Long fileSize, byte[] fileIv, Instant revokedAt) {
+    public Document(UUID documentId, String blobPath, byte[] fileIv, Instant revokedAt) {
         byte[] iv = Objects.requireNonNull(fileIv, "Document entity - Iv column cannot be null");
 
         this.documentId = documentId;
-        this.fileName = fileName;
-        this.mimeType = mimeType;
         this.blobPath = blobPath;
-        this.fileSize = fileSize;
         this.fileIv = Arrays.copyOf(iv, fileIv.length);
         this.revokedAt = revokedAt;
     }
 
-    public Document(UUID documentId, String fileName, String mimeType, String blobPath, Long fileSize, byte[] fileIv) {
-        this(documentId, fileName, mimeType, blobPath, fileSize, fileIv, null);
+    public Document(UUID documentId, String blobPath, byte[] fileIv) {
+        this(documentId, blobPath, fileIv, null);
     }
 
     public UUID identity() {
         return documentId;
     }
 
-    public String fileName() {
-        return fileName;
-    }
-
     public String blobPath() {
         return blobPath;
-    }
-
-    public Long fileSize() {
-        return fileSize;
     }
 
     public byte[] iv() {
@@ -67,9 +53,5 @@ public class Document {
 
     public boolean isRevoked() {
         return Objects.nonNull(revokedAt);
-    }
-
-    public String mimeType() {
-        return mimeType;
     }
 }

@@ -100,8 +100,8 @@ class DocumentControllerTest {
     @Test
     void uploadDocument_return503_whenDocumentCantBeStored() throws Exception {
         MockMultipartFile cantBeStored = new MockMultipartFile(
-                "document", "trigger_BlobStorageException",
-                MediaType.TEXT_PLAIN_VALUE, "bar".getBytes(StandardCharsets.UTF_8));
+                "document", "blob",
+                MediaType.TEXT_PLAIN_VALUE, "trigger_BlobStorageException".getBytes(StandardCharsets.UTF_8));
 
         MockMultipartFile fileIv = new MockMultipartFile(
                 "iv", "ivFile",
@@ -128,7 +128,7 @@ class DocumentControllerTest {
         mockMvc.perform(get(documentResource))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("encryption-metadata-iv"))
-                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"fileName\""))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment"))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
     }
 

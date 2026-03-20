@@ -62,7 +62,7 @@ class DocumentServiceIntegrationTest {
     @Test
     void store_returnsStoredDocument_whenSuccessful() {
         // GIVEN
-        EncryptedDocument properties = new EncryptedDocument("aFile.txt", "text/plain", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
+        EncryptedDocument properties = new EncryptedDocument("test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
 
         // WHEN
         DocumentIdentity result = documentService.store(properties);
@@ -74,7 +74,7 @@ class DocumentServiceIntegrationTest {
     @Test
     void find_returnsStoredDocument_whenDocumentExists() {
         // GIVEN
-        EncryptedDocument encryptedDocument = new EncryptedDocument("aFile.txt", "text/plain", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
+        EncryptedDocument encryptedDocument = new EncryptedDocument("test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
         DocumentIdentity document = documentService.store(encryptedDocument);
 
         // WHEN
@@ -82,16 +82,15 @@ class DocumentServiceIntegrationTest {
 
         // THEN
         Assertions.assertThat(result)
-                .extracting(StoredDocument::fileName, StoredDocument::encryptedBlob)
-                .containsExactly(encryptedDocument.fileName(),
-                        "test".getBytes(StandardCharsets.UTF_8));
+                .extracting(StoredDocument::encryptedBlob)
+                .isEqualTo("test".getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
     void find_throwsDocumentAccessRevokedException_whenDocumentIsRevoked() {
         // GIVEN
         final UUID revokedDocumentId = UUID.randomUUID();
-        Document revokedDocument = new Document(revokedDocumentId, "file", "text/plain" , "path", 42L,
+        Document revokedDocument = new Document(revokedDocumentId, "path",
                 "iv".getBytes(StandardCharsets.UTF_8), Instant.parse("2025-12-03T10:15:30.00Z"));
         documentRepository.save(revokedDocument);
 
@@ -104,7 +103,7 @@ class DocumentServiceIntegrationTest {
 
     @Test
     void store_persistsDocumentToFileSystem_whenSuccessful() {
-        EncryptedDocument document = new EncryptedDocument("aFile.txt", "pdf", "test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
+        EncryptedDocument document = new EncryptedDocument("test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
         DocumentIdentity identity = documentService.store(document);
 
         // WHEN
@@ -113,8 +112,6 @@ class DocumentServiceIntegrationTest {
         // THEN
         Assertions.assertThat(Files.exists(Paths.get(result.blobPath()))).isTrue();
         Assertions.assertThat(result.identity()).isEqualTo(identity.id());
-        Assertions.assertThat(result.mimeType()).isEqualTo("pdf");
-        Assertions.assertThat(result.fileName()).isEqualTo("aFile.txt");
     }
 
 }
