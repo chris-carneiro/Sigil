@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.silentcraft.sigil.domain.cache.DocumentCache;
 import dev.silentcraft.sigil.domain.entity.Document;
 import dev.silentcraft.sigil.domain.error.DocumentAccessRevokedException;
 import dev.silentcraft.sigil.domain.error.DocumentNotFoundException;
@@ -27,15 +28,18 @@ public class DocumentService {
 
     private final DocumentRepository documentRepository;
     private final BlobStorage blobStorage;
+    private final DocumentCache documentCache;
 
     public DocumentService(DocumentRepository documentRepository,
                            @Value("${sigil.document.location.path}") String locationPath,
                            @Value("${sigil.defaults.document.validity-days}") Long documentValidityDays,
-                           BlobStorage blobStorage) {
+                           BlobStorage blobStorage,
+                           DocumentCache documentCache) {
         this.locationPath = Path.of(locationPath).normalize().toAbsolutePath();
         this.documentRepository = documentRepository;
         this.documentValidityDays = Duration.of(documentValidityDays, ChronoUnit.DAYS);
         this.blobStorage = blobStorage;
+        this.documentCache = documentCache;
     }
 
     @Transactional
