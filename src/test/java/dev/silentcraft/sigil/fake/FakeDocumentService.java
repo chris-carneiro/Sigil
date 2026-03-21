@@ -24,7 +24,7 @@ public class FakeDocumentService extends DocumentService {
     private static final byte[] TRIGGER_BLOB_STORAGE_EXCEPTION = "trigger_BlobStorageException".getBytes(StandardCharsets.UTF_8);
 
     public FakeDocumentService(DocumentRepository documentRepository, BlobStorage blobStorage) {
-        super(documentRepository, "", 5L, blobStorage);
+        super(documentRepository, "", 5L, blobStorage, null);
     }
 
     @Override

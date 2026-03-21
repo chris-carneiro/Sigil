@@ -1,6 +1,8 @@
 package dev.silentcraft.sigil.storage;
 
 
+import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
@@ -30,6 +32,9 @@ class RedisDocumentCacheIntegrationTest {
             .withExposedPorts(6379);
 
     private RedisTemplate<String, String> redisTemplate;
+    private RedisDocumentCache cache;
+    private ObjectMapper mapper;
+
 
     @BeforeEach
     void setup() {
@@ -40,6 +45,9 @@ class RedisDocumentCacheIntegrationTest {
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new StringRedisSerializer());
         redisTemplate.afterPropertiesSet();
+
+        mapper = new ObjectMapper();
+        cache = new RedisDocumentCache(redisTemplate, mapper);
     }
 
     @DynamicPropertySource
@@ -51,16 +59,33 @@ class RedisDocumentCacheIntegrationTest {
     @Test
     void get_retrievesDocumentCacheEntry_whenSuccessful() {
         // GIVEN
-        RedisDocumentCache cache = new RedisDocumentCache(redisTemplate, new ObjectMapper());
         String documentCacheKey = UUID.randomUUID().toString();
         DocumentCacheEntry cacheEntry = new DocumentCacheEntry("/path/to/blob", false);
-        cache.put(documentCacheKey, cacheEntry);
+        cache.put(documentCacheKey, cacheEntry, Duration.ofDays(1));
 
         // WHEN
         DocumentCacheEntry result = cache.get(documentCacheKey).orElseThrow();
 
         // THEN
         Assertions.assertThat(result).isEqualTo(cacheEntry);
+    }
+
+    @Test
+    void get_returnsEmpty_whenCacheTimedOut() throws InterruptedException {
+        String documentCacheKey = UUID.randomUUID().toString();
+        DocumentCacheEntry cacheEntry = new DocumentCacheEntry("/path/to/blob", false);
+        cache.put(documentCacheKey, cacheEntry, Duration.ofMillis(1L));
+        waitForTimeout();
+
+        // WHEN
+        Optional<DocumentCacheEntry> result = cache.get(documentCacheKey);
+
+        // THEN
+        Assertions.assertThat(result).isEmpty();
+    }
+
+    private void waitForTimeout() throws InterruptedException {
+        Thread.sleep(10);
     }
 
 }

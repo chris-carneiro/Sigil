@@ -7,12 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import dev.silentcraft.sigil.domain.error.BlobStorageException;
 import dev.silentcraft.sigil.domain.repository.BlobStorage;
 
-@Component
+@Repository
 public class FileSystemStorage implements BlobStorage {
     @Override
     public URI store(Path dir, String fileName, byte[] content) {
