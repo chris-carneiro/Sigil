@@ -19,14 +19,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import dev.silentcraft.sigil.domain.cache.DocumentCache;
 import dev.silentcraft.sigil.domain.entity.Document;
 import dev.silentcraft.sigil.domain.error.DocumentAccessRevokedException;
 import dev.silentcraft.sigil.domain.error.DocumentNotFoundException;
 import dev.silentcraft.sigil.domain.repository.DocumentRepository;
+import dev.silentcraft.sigil.domain.valueobject.DocumentCacheEntry;
 import dev.silentcraft.sigil.domain.valueobject.DocumentIdentity;
 import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
 import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
@@ -44,13 +47,21 @@ class DocumentServiceIntegrationTest {
     @Autowired
     private DocumentRepository documentRepository;
 
+    @Autowired
+    private DocumentCache documentCache;
+
     @TempDir
     private static Path tempDir;
 
     private static final Long TEST_VALIDITY_DAYS = 6L;
 
     @Container
-    private static PostgreSQLContainer<?> postgresDB = new PostgreSQLContainer<>("postgres:15.17")
+    private static final GenericContainer<?> redis = new GenericContainer<>("redis:8.6-alpine")
+            .withExposedPorts(6379);
+
+
+    @Container
+    private static final PostgreSQLContainer<?> postgresDB = new PostgreSQLContainer<>("postgres:15.17")
             .withDatabaseName("test-sigil-db")
             .withUsername("test-user")
             .withPassword("test-user");
@@ -63,6 +74,8 @@ class DocumentServiceIntegrationTest {
         registry.add("spring.datasource.password", postgresDB::getPassword);
         registry.add("sigil.document.location.path", () -> tempDir.toString());
         registry.add("sigil.defaults.document.validity-days", () -> TEST_VALIDITY_DAYS);
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
     }
 
     @Test
@@ -109,6 +122,7 @@ class DocumentServiceIntegrationTest {
 
     @Test
     void store_persistsDocumentToFileSystem_whenSuccessful() {
+        // GIVEN
         EncryptedDocument document = new EncryptedDocument("test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
         DocumentIdentity identity = documentService.store(document);
 
@@ -136,4 +150,17 @@ class DocumentServiceIntegrationTest {
         Assertions.assertThat(result.expiresAt()).isCloseTo(validityPeriod, withAcceptableOffset);
     }
 
+    @Test
+    void store_cachesDocument_whenSuccessful() {
+        // GIVEN
+        EncryptedDocument document = new EncryptedDocument("test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
+        DocumentIdentity identity = documentService.store(document);
+
+        // WHEN
+        DocumentCacheEntry result = documentCache.get(identity.id().toString()).orElseThrow();
+
+        // THEN
+        Assertions.assertThat(result.blobPath()).endsWith(identity.id().toString());
+        Assertions.assertThat(result.isRevoked()).isFalse();
+    }
 }

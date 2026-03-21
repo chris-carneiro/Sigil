@@ -22,13 +22,13 @@ public class RedisDocumentCache implements DocumentCache {
         this.redisTemplate = redisTemplate;
         this.jsonMapper = jsonMapper;
     }
-    
+
     @Override
     public void put(String key, DocumentCacheEntry entry, Duration cacheTimeout) {
         try {
             redisTemplate.opsForValue().set(key, jsonMapper.writeValueAsString(entry), cacheTimeout);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); // TODO fail gracefully & log instead
         }
     }
 
@@ -42,7 +42,7 @@ public class RedisDocumentCache implements DocumentCache {
             }
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); // TODO fail gracefully & log instead
         }
         return Optional.empty();
     }
