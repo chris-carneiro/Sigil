@@ -16,6 +16,7 @@ import dev.silentcraft.sigil.domain.error.DocumentAccessRevokedException;
 import dev.silentcraft.sigil.domain.error.DocumentNotFoundException;
 import dev.silentcraft.sigil.domain.repository.BlobStorage;
 import dev.silentcraft.sigil.domain.repository.DocumentRepository;
+import dev.silentcraft.sigil.domain.valueobject.DocumentCacheEntry;
 import dev.silentcraft.sigil.domain.valueobject.DocumentIdentity;
 import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
 import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
@@ -45,9 +46,12 @@ public class DocumentService {
     @Transactional
     public DocumentIdentity store(EncryptedDocument encryptedDocument) {
         UUID fileId = UUID.randomUUID();
-        documentRepository.save(toEntity(encryptedDocument, fileId));
+        Document document = documentRepository.save(toEntity(encryptedDocument, fileId));
 
         blobStorage.store(locationPath, fileId.toString(), encryptedDocument.encryptedFile());
+
+        DocumentCacheEntry cacheEntry = new DocumentCacheEntry(document.blobPath(), document.isRevoked());
+        documentCache.put(fileId.toString(), cacheEntry, Duration.between(Instant.now(), document.expiresAt()));
         return new DocumentIdentity(fileId);
     }
 
