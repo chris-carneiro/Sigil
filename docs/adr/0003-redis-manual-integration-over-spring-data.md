@@ -21,6 +21,7 @@ The manual approach was chosen for 4 reasons:
 - The implementation sits in the infra /storage package along with other storage-responsible objects
 - The DocumentCacheEntry is an immutable record
 - The TTL duration can be set directly when storing entry into cache.
+- The manual configuration of the RedisTemplate bean triggers the redis repository scanning and show a warning log at startup. RedisRepositoriesAutoConfiguration was excluded from auto-configuration to remove that noise.   
 
 
 
