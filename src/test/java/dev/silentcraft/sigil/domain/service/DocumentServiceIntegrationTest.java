@@ -145,6 +145,19 @@ class DocumentServiceIntegrationTest {
     }
 
     @Test
+    void find_throwsDocumentNotFoundException_whenHitsCacheAndFileNotFound() {
+        // GIVEN
+        UUID documentId = UUID.randomUUID();
+        DocumentCacheEntry documentCacheEntry = new DocumentCacheEntry("/", "iv".getBytes(StandardCharsets.UTF_8), false);
+        documentCache.put(documentId.toString(), documentCacheEntry, Duration.ofMinutes(3L));
+
+        // THEN
+        Assertions.assertThatThrownBy(() -> documentService.find(documentId))
+                .isExactlyInstanceOf(DocumentNotFoundException.class)
+                .hasMessage("Document can't be found");
+    }
+
+    @Test
     void store_persistsDocumentToFileSystem_whenSuccessful() {
         // GIVEN
         EncryptedDocument document = new EncryptedDocument("test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
