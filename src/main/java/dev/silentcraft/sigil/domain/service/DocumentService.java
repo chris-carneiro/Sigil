@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.silentcraft.sigil.domain.cache.DocumentCache;
 import dev.silentcraft.sigil.domain.entity.Document;
+import dev.silentcraft.sigil.domain.error.BlobStorageException;
 import dev.silentcraft.sigil.domain.error.DocumentAccessRevokedException;
 import dev.silentcraft.sigil.domain.error.DocumentNotFoundException;
 import dev.silentcraft.sigil.domain.repository.BlobStorage;
@@ -57,27 +58,31 @@ public class DocumentService {
     }
 
     public StoredDocument find(UUID identity) {
-        Optional<DocumentCacheEntry> documentCacheEntry = documentCache.get(identity.toString());
-        if (documentCacheEntry.isPresent()) {
-            DocumentCacheEntry cacheEntry = documentCacheEntry.get();
-            if (cacheEntry.isRevoked()) {
-                throw new DocumentAccessRevokedException();
+        try {
+            Optional<DocumentCacheEntry> documentCacheEntry = documentCache.get(identity.toString());
+            if (documentCacheEntry.isPresent()) {
+                DocumentCacheEntry cacheEntry = documentCacheEntry.get();
+                if (cacheEntry.isRevoked()) {
+                    throw new DocumentAccessRevokedException();
+                }
+                byte[] blob = blobStorage.read(Path.of(cacheEntry.fileLocation()));
+                return new StoredDocument(blob, cacheEntry.iv());
             }
-            return new StoredDocument(blobStorage.read(Path.of(cacheEntry.fileLocation())), cacheEntry.iv());
-
-        }
-        return documentRepository.findById(identity)
-                .map(document -> {
-                            if (document.isRevoked()) {
-                                throw new DocumentAccessRevokedException();
+            return documentRepository.findById(identity)
+                    .map(document -> {
+                                if (document.isRevoked()) {
+                                    throw new DocumentAccessRevokedException();
+                                }
+                                Path documentPath = Path.of(document.blobPath());
+                                return new StoredDocument(blobStorage.read(documentPath),
+                                        document.iv()
+                                );
                             }
-                            Path documentPath = Path.of(document.blobPath());
-                            return new StoredDocument(blobStorage.read(documentPath),
-                                    document.iv()
-                            );
-                        }
-                )
-                .orElseThrow(DocumentNotFoundException::new);
+                    )
+                    .orElseThrow(DocumentNotFoundException::new);
+        } catch (BlobStorageException e) {
+            throw new DocumentNotFoundException();
+        }
     }
 
     private Document toEntity(EncryptedDocument properties, UUID fileId) {
@@ -91,8 +96,8 @@ public class DocumentService {
 
     public void revoke(UUID documentId) {
         documentRepository.findById(documentId)
-                .ifPresent(doc -> {
-                    documentRepository.save(doc.markRevoked());
+                .ifPresent(document -> {
+                    documentRepository.save(document.markRevoked());
                     // silently ignoring non existing document - avoid enumeration attack
                 });
 
