@@ -50,4 +50,9 @@ public class FakeDocumentService extends DocumentService {
 
         throw new DocumentNotFoundException();
     }
+
+    @Override
+    public void revoke(UUID documentId) {
+
+    }
 }

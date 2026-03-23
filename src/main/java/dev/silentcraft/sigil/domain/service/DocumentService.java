@@ -88,4 +88,12 @@ public class DocumentService {
                 Instant.now().plus(documentValidityDays)
         );
     }
+
+    public void revoke(UUID documentId) {
+        documentRepository.findById(documentId)
+                .ifPresent(doc -> {
+                    documentRepository.save(doc.markRevoked());
+                });
+        // silently ignoring non existing document - avoid enumeration attack
+    }
 }

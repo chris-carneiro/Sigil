@@ -186,4 +186,20 @@ class DocumentServiceIntegrationTest {
         Assertions.assertThat(result.fileLocation()).endsWith(identity.id().toString());
         Assertions.assertThat(result.isRevoked()).isFalse();
     }
+
+    @Test
+    void revoke_markDocumentAsRevoked_whenSuccessful() {
+        // GIVEN
+        UUID documentId = UUID.randomUUID();
+        Document document = new Document(documentId, "path",
+                "iv".getBytes(StandardCharsets.UTF_8), Instant.parse("2026-12-03T10:15:30.00Z"));
+        documentRepository.save(document);
+
+        // WHEN
+        documentService.revoke(documentId);
+
+        // THEN
+        Document result = documentRepository.findById(documentId).orElseThrow();
+        Assertions.assertThat(result.isRevoked()).isTrue();
+    }
 }
