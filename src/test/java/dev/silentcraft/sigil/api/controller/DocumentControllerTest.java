@@ -1,5 +1,6 @@
 package dev.silentcraft.sigil.api.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -113,7 +114,6 @@ class DocumentControllerTest {
                 .andExpect(jsonPath("$.message")
                         .value("The document could not be stored. Please try again later."));
 
-
     }
 
 
@@ -154,6 +154,13 @@ class DocumentControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
                         .value("Document can't be found"));
+    }
+
+    @Test
+    void revokeDocument_returnsNoContent_whenSuccessful() throws Exception {
+        UUID documentId = UUID.randomUUID();
+        mockMvc.perform(delete(URI.create("/api/v1/documents/%s".formatted(documentId))))
+                .andExpect(status().isNoContent());
     }
 
 }

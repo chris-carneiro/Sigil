@@ -20,7 +20,6 @@ public class Document {
     private Instant revokedAt;
     private Instant expiresAt;
 
-
     private Document() {
     }
 
@@ -61,5 +60,10 @@ public class Document {
 
     public Instant expiresAt() {
         return expiresAt;
+    }
+
+    public Document markRevoked() {
+        revokedAt = Instant.now();
+        return this;
     }
 }
