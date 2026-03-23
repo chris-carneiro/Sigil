@@ -9,4 +9,6 @@ public interface DocumentCache {
     void put(String key, DocumentCacheEntry entry, Duration cacheTimeout);
 
     Optional<DocumentCacheEntry> get(String key);
+
+    void evict(String documentId);
 }
