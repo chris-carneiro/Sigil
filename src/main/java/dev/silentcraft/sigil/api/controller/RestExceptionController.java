@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import dev.silentcraft.sigil.api.error.InvalidDocumentException;
@@ -49,9 +50,17 @@ public class RestExceptionController {
     }
 
     @ExceptionHandler(BlobStorageException.class)
-    public ResponseEntity<SigilErrorResponse> handleBlobStorageExceptino(BlobStorageException ex) {
+    public ResponseEntity<SigilErrorResponse> handleBlobStorageException(BlobStorageException ex) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(SigilErrorResponse.serviceUnavailable(ex.getMessage()));
     }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<SigilErrorResponse> handleInvalidMethodParamException(MethodArgumentTypeMismatchException param) {
+        final String message = "Wrong format for parameter: %s".formatted(param.getName());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(SigilErrorResponse.badFormat(message));
+    }
+
 
 }

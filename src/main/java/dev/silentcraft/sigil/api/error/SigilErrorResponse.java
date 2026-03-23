@@ -19,5 +19,9 @@ public record SigilErrorResponse(int status, String message) {
     public static SigilErrorResponse serviceUnavailable(String message) {
         return new SigilErrorResponse(HttpStatus.SERVICE_UNAVAILABLE.value(), message);
     }
+
+    public static SigilErrorResponse badFormat(String formatted) {
+        return new SigilErrorResponse(HttpStatus.BAD_REQUEST.value(), formatted);
+    }
 }
 
