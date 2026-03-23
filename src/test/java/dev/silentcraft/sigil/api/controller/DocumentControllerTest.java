@@ -163,4 +163,13 @@ class DocumentControllerTest {
                 .andExpect(status().isNoContent());
     }
 
+
+    @Test
+    void controller_handlesException_whenDocumentIdHasWrongFormat() throws Exception {
+
+        mockMvc.perform(delete(URI.create("/api/v1/documents/%s".formatted("wrong-format"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Wrong format for parameter: documentId"));
+    }
 }
