@@ -1,5 +1,6 @@
 package dev.silentcraft.sigil.domain.service;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,6 +29,7 @@ import dev.silentcraft.sigil.domain.cache.DocumentCache;
 import dev.silentcraft.sigil.domain.entity.Document;
 import dev.silentcraft.sigil.domain.error.DocumentAccessRevokedException;
 import dev.silentcraft.sigil.domain.error.DocumentNotFoundException;
+import dev.silentcraft.sigil.domain.repository.BlobStorage;
 import dev.silentcraft.sigil.domain.repository.DocumentRepository;
 import dev.silentcraft.sigil.domain.valueobject.DocumentCacheEntry;
 import dev.silentcraft.sigil.domain.valueobject.DocumentIdentity;
@@ -49,6 +51,9 @@ class DocumentServiceIntegrationTest {
 
     @Autowired
     private DocumentCache documentCache;
+
+    @Autowired
+    private BlobStorage blobStorage;
 
     @TempDir
     private static Path tempDir;
@@ -121,6 +126,24 @@ class DocumentServiceIntegrationTest {
     }
 
     @Test
+    void find_getDocumentFromCache_whenHitsCache(@TempDir Path path) {
+        // GIVEN
+        UUID documentId = UUID.randomUUID();
+        String fileName = documentId.toString();
+        URI blobLocation = blobStorage.store(path, fileName, "test".getBytes(StandardCharsets.UTF_8));
+        DocumentCacheEntry documentCacheEntry = new DocumentCacheEntry(blobLocation.getPath(), "iv".getBytes(StandardCharsets.UTF_8), false);
+        documentCache.put(fileName, documentCacheEntry, Duration.ofMinutes(3L));
+
+        // WHEN
+        StoredDocument result = documentService.find(documentId);
+
+        // THEN
+        Assertions.assertThat(result).isNotNull();
+        Assertions.assertThat(result.encryptedBlob()).isNotNull();
+        Assertions.assertThat(result.iv()).isNotNull();
+    }
+
+    @Test
     void store_persistsDocumentToFileSystem_whenSuccessful() {
         // GIVEN
         EncryptedDocument document = new EncryptedDocument("test".getBytes(StandardCharsets.UTF_8), "iv".getBytes(StandardCharsets.UTF_8));
@@ -160,7 +183,7 @@ class DocumentServiceIntegrationTest {
         DocumentCacheEntry result = documentCache.get(identity.id().toString()).orElseThrow();
 
         // THEN
-        Assertions.assertThat(result.blobPath()).endsWith(identity.id().toString());
+        Assertions.assertThat(result.fileLocation()).endsWith(identity.id().toString());
         Assertions.assertThat(result.isRevoked()).isFalse();
     }
 }
