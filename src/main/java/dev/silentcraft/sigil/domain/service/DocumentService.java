@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -50,12 +51,21 @@ public class DocumentService {
 
         blobStorage.store(locationPath, fileId.toString(), encryptedDocument.encryptedFile());
 
-        DocumentCacheEntry cacheEntry = new DocumentCacheEntry(document.blobPath(), document.isRevoked());
+        DocumentCacheEntry cacheEntry = new DocumentCacheEntry(document.blobPath(), document.iv(), document.isRevoked());
         documentCache.put(fileId.toString(), cacheEntry, Duration.between(Instant.now(), document.expiresAt()));
         return new DocumentIdentity(fileId);
     }
 
     public StoredDocument find(UUID identity) {
+        Optional<DocumentCacheEntry> documentCacheEntry = documentCache.get(identity.toString());
+        if (documentCacheEntry.isPresent()) {
+            DocumentCacheEntry cacheEntry = documentCacheEntry.get();
+            if (cacheEntry.isRevoked()) {
+                throw new DocumentAccessRevokedException();
+            }
+            return new StoredDocument(blobStorage.read(Path.of(cacheEntry.fileLocation())), cacheEntry.iv());
+
+        }
         return documentRepository.findById(identity)
                 .map(document -> {
                             if (document.isRevoked()) {

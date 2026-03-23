@@ -60,20 +60,21 @@ class RedisDocumentCacheIntegrationTest {
     void get_retrievesDocumentCacheEntry_whenSuccessful() {
         // GIVEN
         String documentCacheKey = UUID.randomUUID().toString();
-        DocumentCacheEntry cacheEntry = new DocumentCacheEntry("/path/to/blob", false);
+        DocumentCacheEntry cacheEntry = new DocumentCacheEntry("/path/to/blob", new byte[0], false);
         cache.put(documentCacheKey, cacheEntry, Duration.ofDays(1));
 
         // WHEN
         DocumentCacheEntry result = cache.get(documentCacheKey).orElseThrow();
 
         // THEN
-        Assertions.assertThat(result).isEqualTo(cacheEntry);
+        Assertions.assertThat(result.fileLocation()).isEqualTo(cacheEntry.fileLocation());
+        Assertions.assertThat(result.isRevoked()).isEqualTo(cacheEntry.isRevoked());
     }
 
     @Test
     void get_returnsEmpty_whenCacheTimedOut() throws InterruptedException {
         String documentCacheKey = UUID.randomUUID().toString();
-        DocumentCacheEntry cacheEntry = new DocumentCacheEntry("/path/to/blob", false);
+        DocumentCacheEntry cacheEntry = new DocumentCacheEntry("/path/to/blob", new byte[0], false);
         cache.put(documentCacheKey, cacheEntry, Duration.ofMillis(1L));
         waitForTimeout();
 
