@@ -46,4 +46,9 @@ public class RedisDocumentCache implements DocumentCache {
         }
         return Optional.empty();
     }
+
+    @Override
+    public void evict(String documentId) {
+        redisTemplate.delete(documentId);
+    }
 }

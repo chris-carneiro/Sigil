@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
@@ -201,5 +202,21 @@ class DocumentServiceIntegrationTest {
         // THEN
         Document result = documentRepository.findById(documentId).orElseThrow();
         Assertions.assertThat(result.isRevoked()).isTrue();
+    }
+
+    @Test
+    void revoke_evictsDocumentFromCache_whenExists(@TempDir Path path) {
+        // GIVEN
+        UUID documentId = UUID.randomUUID();
+        DocumentCacheEntry cacheEntry = new DocumentCacheEntry(path.toString(), "".getBytes(StandardCharsets.UTF_8), true);
+        documentCache.put(documentId.toString(), cacheEntry, Duration.of(1L, ChronoUnit.DAYS));
+
+
+        // WHEN
+        documentService.revoke(documentId);
+
+        // THEN
+        Optional<DocumentCacheEntry> result = documentCache.get(documentId.toString());
+        Assertions.assertThat(result).isEmpty();
     }
 }

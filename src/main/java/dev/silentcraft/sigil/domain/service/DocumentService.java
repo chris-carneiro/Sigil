@@ -93,7 +93,9 @@ public class DocumentService {
         documentRepository.findById(documentId)
                 .ifPresent(doc -> {
                     documentRepository.save(doc.markRevoked());
+                    // silently ignoring non existing document - avoid enumeration attack
                 });
-        // silently ignoring non existing document - avoid enumeration attack
+
+        documentCache.evict(documentId.toString());
     }
 }
