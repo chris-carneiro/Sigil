@@ -145,6 +145,19 @@ class DocumentServiceIntegrationTest {
     }
 
     @Test
+    void find_throwsDocumentAccessRevokedException_whenHitsCacheAndDocumentRevoked() {
+        // GIVEN
+        UUID documentId = UUID.randomUUID();
+        DocumentCacheEntry documentCacheEntry = new DocumentCacheEntry("/", "iv".getBytes(StandardCharsets.UTF_8), true);
+        documentCache.put(documentId.toString(), documentCacheEntry, Duration.ofMinutes(3L));
+
+        // THEN
+        Assertions.assertThatThrownBy(() -> documentService.find(documentId))
+                .isExactlyInstanceOf(DocumentAccessRevokedException.class)
+                .hasMessage("Document can't be found");
+    }
+
+    @Test
     void find_throwsDocumentNotFoundException_whenHitsCacheAndFileNotFound() {
         // GIVEN
         UUID documentId = UUID.randomUUID();

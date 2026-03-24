@@ -21,6 +21,7 @@ import dev.silentcraft.sigil.domain.repository.DocumentRepository;
 import dev.silentcraft.sigil.domain.valueobject.DocumentCacheEntry;
 import dev.silentcraft.sigil.domain.valueobject.DocumentIdentity;
 import dev.silentcraft.sigil.domain.valueobject.EncryptedDocument;
+import dev.silentcraft.sigil.domain.valueobject.ResolvedDocument;
 import dev.silentcraft.sigil.domain.valueobject.StoredDocument;
 
 @Service
@@ -59,31 +60,41 @@ public class DocumentService {
 
     public StoredDocument find(UUID identity) {
         try {
-            Optional<DocumentCacheEntry> documentCacheEntry = documentCache.get(identity.toString());
-            if (documentCacheEntry.isPresent()) {
-                DocumentCacheEntry cacheEntry = documentCacheEntry.get();
-                if (cacheEntry.isRevoked()) {
+            Optional<ResolvedDocument> resolvedDocument = resolveDocumentCacheEntry(identity)
+                    .or(() -> resolveDocument(identity));
+
+            if (resolvedDocument.isPresent()) {
+                var document = resolvedDocument.get();
+                if (document.revoked()) {
                     throw new DocumentAccessRevokedException();
                 }
-                byte[] blob = blobStorage.read(Path.of(cacheEntry.fileLocation()));
-                return new StoredDocument(blob, cacheEntry.iv());
+                byte[] blob = blobStorage.read(document.fileLocation());
+                return new StoredDocument(blob, document.iv());
             }
-            return documentRepository.findById(identity)
-                    .map(document -> {
-                                if (document.isRevoked()) {
-                                    throw new DocumentAccessRevokedException();
-                                }
-                                Path documentPath = Path.of(document.blobPath());
-                                return new StoredDocument(blobStorage.read(documentPath),
-                                        document.iv()
-                                );
-                            }
-                    )
-                    .orElseThrow(DocumentNotFoundException::new);
-        } catch (BlobStorageException e) {
+            throw new DocumentNotFoundException();
+        } catch (
+                BlobStorageException e) {
             throw new DocumentNotFoundException();
         }
     }
+
+    private Optional<ResolvedDocument> resolveDocument(UUID identity) {
+        return documentRepository.findById(identity).map(
+                doc -> {
+                    return new ResolvedDocument(Path.of(doc.blobPath()), doc.iv(), doc.isRevoked());
+                }
+        );
+    }
+
+    private Optional<ResolvedDocument> resolveDocumentCacheEntry(UUID key) {
+        return documentCache.get(key.toString()).map(
+                doc -> {
+
+                    return new ResolvedDocument(Path.of(doc.fileLocation()), doc.iv(), doc.isRevoked());
+                }
+        );
+    }
+
 
     private Document toEntity(EncryptedDocument properties, UUID fileId) {
         String blobPath = "%s/%s".formatted(locationPath, fileId);
