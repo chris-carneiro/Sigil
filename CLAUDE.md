@@ -390,15 +390,15 @@ What becomes easier? What becomes harder? What must be remembered?
 
 | Task | Description                                                                           | Status |
 |------|---------------------------------------------------------------------------------------|--------|
-| 5.1  | Redis validity cache — `doc:valid:{uuid}` with TTL, O(1) `isValid`, revoke via DELETE | ⏳      | 
-| 5.2  | Revocation endpoint — Redis invalidation + durable PostgreSQL record                  |        |
+| 5.1  | Redis validity cache — `doc:valid:{uuid}` with TTL, O(1) `isValid`, revoke via DELETE | ✅      | 
+| 5.2  | Revocation endpoint — Redis invalidation + durable PostgreSQL record                  | ✅      |
 
 ### Phase 4 — CI/CD (Weeks 7–8)
 
-| Task | Description                                                              |
-|------|--------------------------------------------------------------------------|
-| 7.1  | Multi-stage Dockerfile — JDK builder, JRE runtime, non-root user, <200MB |
-| 8.1  | GitHub Actions — test pipeline with PostgreSQL + Redis services          |
+| Task | Description                                                              | Status |
+|------|--------------------------------------------------------------------------|--------|
+| 7.1  | Multi-stage Dockerfile — JDK builder, JRE runtime, non-root user, <200MB | ⏳      |
+| 8.1  | GitHub Actions — test pipeline with PostgreSQL + Redis services          |        |
 
 ### Phase 5 — Polish and Release (Weeks 9–12)
 
