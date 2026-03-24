@@ -60,22 +60,30 @@ public class DocumentService {
 
     public StoredDocument find(UUID identity) {
         try {
-            Optional<ResolvedDocument> resolvedDocument = resolveDocumentCacheEntry(identity)
-                    .or(() -> resolveDocument(identity));
+            ResolvedDocument resolvedDocument = resolveDocumentCacheEntry(identity)
+                    .or(() -> resolveDocument(identity))
+                    .orElseThrow(DocumentNotFoundException::new);
 
-            if (resolvedDocument.isPresent()) {
-                var document = resolvedDocument.get();
-                if (document.revoked()) {
-                    throw new DocumentAccessRevokedException();
-                }
-                byte[] blob = blobStorage.read(document.fileLocation());
-                return new StoredDocument(blob, document.iv());
+            if (resolvedDocument.revoked()) {
+                throw new DocumentAccessRevokedException();
             }
-            throw new DocumentNotFoundException();
-        } catch (
-                BlobStorageException e) {
+
+            byte[] blob = blobStorage.read(resolvedDocument.fileLocation());
+            return new StoredDocument(blob, resolvedDocument.iv());
+
+        } catch (BlobStorageException e) {
             throw new DocumentNotFoundException();
         }
+    }
+
+    public void revoke(UUID documentId) {
+        documentRepository.findById(documentId)
+                .ifPresent(document -> {
+                    documentRepository.save(document.markRevoked());
+                    // silently ignoring non existing document - avoid enumeration attack
+                });
+
+        documentCache.evict(documentId.toString());
     }
 
     private Optional<ResolvedDocument> resolveDocument(UUID identity) {
@@ -95,7 +103,6 @@ public class DocumentService {
         );
     }
 
-
     private Document toEntity(EncryptedDocument properties, UUID fileId) {
         String blobPath = "%s/%s".formatted(locationPath, fileId);
         return new Document(fileId,
@@ -103,15 +110,5 @@ public class DocumentService {
                 properties.fileIv(),
                 Instant.now().plus(documentValidityDays)
         );
-    }
-
-    public void revoke(UUID documentId) {
-        documentRepository.findById(documentId)
-                .ifPresent(document -> {
-                    documentRepository.save(document.markRevoked());
-                    // silently ignoring non existing document - avoid enumeration attack
-                });
-
-        documentCache.evict(documentId.toString());
     }
 }
