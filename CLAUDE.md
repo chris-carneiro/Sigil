@@ -397,8 +397,8 @@ What becomes easier? What becomes harder? What must be remembered?
 
 | Task | Description                                                              | Status |
 |------|--------------------------------------------------------------------------|--------|
-| 7.1  | Multi-stage Dockerfile — JDK builder, JRE runtime, non-root user, <200MB | ⏳      |
-| 8.1  | GitHub Actions — test pipeline with PostgreSQL + Redis services          |        |
+| 7.1  | Multi-stage Dockerfile — JDK builder, JRE runtime, non-root user, <200MB | ✅      |
+| 8.1  | GitHub Actions — test pipeline with PostgreSQL + Redis services          | ⏳      |
 
 ### Phase 5 — Polish and Release (Weeks 9–12)
 
