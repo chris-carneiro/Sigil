@@ -1,3 +1,8 @@
+logging:
+  level:
+    dev.silentcraft: ${LOG_LEVEL_APP:INFO}
+    org.apache.tomcat: ${LOG_LEVEL_TOMCAT:INFO}
+    org.springframework.web: ${LOG_LEVEL_SPRING:INFO}
 spring:
   jpa:
     open-in-view: false
