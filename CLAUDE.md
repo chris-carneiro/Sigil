@@ -353,14 +353,7 @@ What becomes easier? What becomes harder? What must be remembered?
 
 ---
 
-## Current Progress — Phase 2 Completed. Envelope refactor pending before Phase 3.
-
-## Up next
-
-1. Write ADR for the envelope pattern decision
-2. Envelope refactor — drop `file_name`/`mime_type` from DB, update value objects, update client upload and download
-   paths
-3. Phase 3 Task 5.1 — Redis validity cache
+## Current Progress — Phase 4 Completed.
 
 ---
 
@@ -398,11 +391,11 @@ What becomes easier? What becomes harder? What must be remembered?
 | Task | Description                                                              | Status |
 |------|--------------------------------------------------------------------------|--------|
 | 7.1  | Multi-stage Dockerfile — JDK builder, JRE runtime, non-root user, <200MB | ✅      |
-| 8.1  | GitHub Actions — test pipeline with PostgreSQL + Redis services          | ⏳      |
+| 8.1  | GitHub Actions — test pipeline with PostgreSQL + Redis services          | ✅      |
 
 ### Phase 5 — Polish and Release (Weeks 9–12)
 
-| Task | Description                                                                            |
-|------|----------------------------------------------------------------------------------------|
-| 9.1  | React component architecture — UploadPage, FileDropzone, ExpirySelector, QRCodeDisplay |
-| 12.1 | v1.0.0 release — README, GHCR image, green CI badge                                    |
+| Task | Description                                                                            | Status |
+|------|----------------------------------------------------------------------------------------|--------|
+| 9.1  | React component architecture — UploadPage, FileDropzone, ExpirySelector, QRCodeDisplay | ⏳      |
+| 12.1 | v1.0.0 release — README, GHCR image, green CI badge                                    | ⏳      |
