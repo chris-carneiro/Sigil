@@ -12,6 +12,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import dev.silentcraft.sigil.fake.FakeDocumentService;
 import dev.silentcraft.sigil.fake.FakeUnreadableMultipartFile;
+import dev.silentcraft.sigil.fake.FakeUploadFileSizeExceededMultipartFile;
 
 @WebMvcTest(DocumentController.class)
 @Import(TestConfig.class)
@@ -52,6 +54,20 @@ class DocumentControllerTest {
                 .andExpect(jsonPath("$.documentId").exists())
                 .andExpect(jsonPath("$.documentId")
                         .value("00000000-0000-0000-0000-000000000001"));
+    }
+
+    @Test
+    void uploadDocument_returns400_whenFileSizeExceeded() throws Exception {
+        MockMultipartFile file = new FakeUploadFileSizeExceededMultipartFile("document", "bar".getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile fileIv = new MockMultipartFile(
+                "iv", "ivFile",
+                MediaType.APPLICATION_OCTET_STREAM_VALUE, "bar".getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/api/v1/documents")
+                        .file(file)
+                        .file(fileIv))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", Matchers.containsString("Maximum upload size of")));
     }
 
     @Test
