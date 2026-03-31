@@ -1,0 +1,21 @@
+:root {
+    --color-bg: #F5F8F8;
+    --color-surface: #FFFFFF;
+    --color-border: #DDE5E5;
+    --color-text: #1A2E2E;
+    --color-text-muted: #5A7070;
+    --color-accent: #37ACA8;
+    --color-accent-hover: #2B8E8A;
+    --color-danger: #E05252;
+
+    --font-sans: 'Syne', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+
+    --tracking-wide: 2px;
+    --tracking-widest: 3px;
+    --tracking-tight: -1px;
+    /* tracking = letter-spacing in Tailwind */
+    --leading-normal: 1.6;
+    /* leading = line-height in Tailwind */
+}
