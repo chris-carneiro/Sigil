@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import './App.css'
 import SelectFile from './components/SelectFile'
 import encrypt, { decrypt } from './secure/encryption';
 import './secure/encryption'
 import { QRCodeSVG } from 'qrcode.react';
-import sigilLogo from './assets/sigil_mark.svg';
+import sigilLogo from './assets/sigil_mark_light.svg';
+import TopBar from './components/layout/TopBar';
 
 function App() {
   const [qrCodeUrl, setQRCodeUrl] = useState(null);
@@ -191,14 +191,14 @@ function App() {
   if (qrCodeUrl) return <QRCodeSVG
     value={qrCodeUrl}
     title="Scan to download private document"
-    size={256}
-    bgColor={"#ffffff"}
-    fgColor={"#000000"}
+    size={512}
+    bgColor={"#F7F8F8"}
+    fgColor={"#37ACA8"}
     level={"H"}
     imageSettings={{
       src: sigilLogo,
-      height: 56,
-      width: 56,
+      height: 128,
+      width: 128,
       opacity: 1,
       excavate: true,
     }}
@@ -208,6 +208,7 @@ function App() {
 
   return (
     <>
+      <TopBar />
       {hasError && <p className="error">{hasError}</p>}
       <SelectFile onFileSelected={handleFile} />
     </>)

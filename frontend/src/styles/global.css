@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+@import './variables.css';
+
+
+body {
+    font-family: var(--font-sans);
+    margin: 0;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    min-height: 100vh;
+    min-width: 320px;
+}
