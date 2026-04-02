@@ -1,7 +1,7 @@
 # Sigil — Share Privately
 
 [![Java CI with Maven](https://github.com/chris-carneiro/Sigil/actions/workflows/tests.yml/badge.svg)](https://github.com/chris-carneiro/Sigil/actions/workflows/tests.yml)
-![Coverage](.github/badges/jacoco.svg)
+![Coverage](https://raw.githubusercontent.com/chris-carneiro/Sigil/main/.github/badges/jacoco.svg)
 
 Secure document sharing via expiring QR codes. Documents are encrypted
 in the browser before upload. The server stores only encrypted bytes
@@ -92,7 +92,9 @@ curl localhost:8080/actuator/health
 **It should return:**
 
 ```json
-{"status":"UP"}
+{
+  "status": "UP"
+}
 ```
 
 ## Frontend
