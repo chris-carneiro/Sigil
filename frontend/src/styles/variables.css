@@ -12,10 +12,12 @@
     --font-mono: 'JetBrains Mono', monospace;
 
 
+    /* tracking = letter-spacing in Tailwind */
     --tracking-wide: 2px;
     --tracking-widest: 3px;
     --tracking-tight: -1px;
-    /* tracking = letter-spacing in Tailwind */
-    --leading-normal: 1.6;
     /* leading = line-height in Tailwind */
+    --leading-normal: 1.6;
+
+    --topbar-height: 40px;
 }
