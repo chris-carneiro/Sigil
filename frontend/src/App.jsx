@@ -5,6 +5,7 @@ import './secure/encryption'
 import { QRCodeSVG } from 'qrcode.react';
 import sigilLogo from './assets/sigil_mark_light.svg';
 import TopBar from './components/layout/TopBar';
+import Main from './components/layout/Main';
 
 function App() {
   const [qrCodeUrl, setQRCodeUrl] = useState(null);
@@ -210,7 +211,9 @@ function App() {
     <>
       <TopBar />
       {hasError && <p className="error">{hasError}</p>}
-      <SelectFile onFileSelected={handleFile} />
+      <Main>
+        <SelectFile onFileSelected={handleFile} />
+      </Main>
     </>)
 }
 
