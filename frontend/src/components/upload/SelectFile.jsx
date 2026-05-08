@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import styles from './SelectFile.module.css';
 
 function SelectFile({ onFileSelected }) {
     const [file, setFile] = useState(null);
@@ -8,9 +8,9 @@ function SelectFile({ onFileSelected }) {
     return (
         <div>
             <input type="file" onChange={e => setFile(e.target.files[0])} />
-            <input type="button" onClick={() => {
+            <button className={styles.button} type="button" onClick={() => {
                 onFileSelected(file)
-            }} value="Upload" />
+            }} value="Upload">Upload</button>
         </div>
     );
 }

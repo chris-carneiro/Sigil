@@ -4,4 +4,5 @@
     align-items: center;
     height: calc(100vh - var(--topbar-height));
     min-height: fit-content;
+    background: radial-gradient(ellipse at center, color-mix(in srgb, var(--color-accent) 8%, transparent), var(--color-surface));
 }
