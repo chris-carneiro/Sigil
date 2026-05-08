@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import SelectFile from './components/SelectFile'
+import SelectFile from './components/upload/SelectFile'
 import encrypt, { decrypt } from './secure/encryption';
 import './secure/encryption'
 import { QRCodeSVG } from 'qrcode.react';
 import sigilLogo from './assets/sigil_mark_light.svg';
 import TopBar from './components/layout/TopBar';
 import Main from './components/layout/Main';
+import UploadPage from './components/upload/UploadPage';
 
 function App() {
   const [qrCodeUrl, setQRCodeUrl] = useState(null);
@@ -212,7 +213,9 @@ function App() {
       <TopBar />
       {hasError && <p className="error">{hasError}</p>}
       <Main>
-        <SelectFile onFileSelected={handleFile} />
+        <UploadPage>
+          <SelectFile onFileSelected={handleFile} />
+        </UploadPage>
       </Main>
     </>)
 }
