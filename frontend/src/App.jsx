@@ -65,13 +65,18 @@ function App() {
     }
   }
 
-  async function handleFile(file) {
-    if (!file || !file.name) return;
+  async function handleFile(files) {
+    console.log("files", files);
+    if (!files || files.length == 0) return;
+    const firstFile = files[0];
+    console.log("firstFile", firstFile);
+    if (!firstFile || !firstFile.name) return;
+
     try {
       const fileSizeLimit = 10000000;
-      if (file.size > fileSizeLimit) throw new Error("File is too large");
+      if (firstFile.size > fileSizeLimit) throw new Error("File is too large");
 
-      const envelope = await buildEnvelope(file);
+      const envelope = await buildEnvelope(firstFile);
       const { cipherText, rawKey, iv } = await encrypt(envelope);
 
       const formData = new FormData();
@@ -86,6 +91,7 @@ function App() {
       });
 
       if (!response.ok) {
+        console.log("res", response)
         throw Error("The encrypted document could not be stored")
       }
 
