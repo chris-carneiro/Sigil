@@ -8,6 +8,7 @@ import TopBar from './components/layout/TopBar';
 import Main from './components/layout/Main';
 import UploadPage from './components/upload/UploadPage';
 import { buildEnvelope, openEnvelope } from './crypto/envelope'
+import { getDocument as fetchDocument, postDocument as uploadDocument } from './api/documents';
 
 function App() {
   const [qrCodeUrl, setQRCodeUrl] = useState(null);
@@ -33,21 +34,11 @@ function App() {
       formData.append("document", new Blob([cipherText], { type: "application/octet-stream" }));
       formData.append("iv", new Blob([iv], { type: "application/octet-stream" }));
 
-
-      const response = await fetch('/api/v1/documents', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        console.log("res", response)
-        throw Error("The encrypted document could not be stored")
-      }
-
-      const body = await response.json()
+      const { documentId } = await uploadDocument(formData);
+      
       const encodedKey = new Uint8Array(rawKey).toBase64({ alphabet: "base64url", omitPadding: true });
-      Uint8Array(rawKey).fill(0);
-      const qrUrl = `${window.location.origin}/documents/download/${body.documentId}#${encodedKey}`;
+      new Uint8Array(rawKey).fill(0);
+      const qrUrl = `${window.location.origin}/documents/download/${documentId}#${encodedKey}`;
 
       setQRCodeUrl(qrUrl);
     } catch (e) {
@@ -79,16 +70,9 @@ function App() {
       try {
         const { documentId, key } = parseMetadata();
         if (documentId) {
-          const response = await fetch('/api/v1/documents/' + documentId, {
-            method: 'GET'
-          });
-
-          if (!response.ok) {
-            throw Error("The encrypted document could not be fetched");
-          }
-
-          const encryptedBytes = await response.arrayBuffer();
-          const iv = response.headers.get("encryption-metadata-iv");
+  
+          const {encryptedBytes, base64EncodedIV: iv} = await fetchDocument(documentId);
+          
           const decodedKey = Uint8Array.fromBase64(key, { alphabet: "base64url", omitPadding: true });
           const decodedIv = Uint8Array.fromBase64(iv);
           const envelop = await decrypt(encryptedBytes, decodedKey, decodedIv);
