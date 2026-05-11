@@ -6,63 +6,12 @@ import sigilLogo from './assets/sigil_mark_light.svg';
 import TopBar from './components/layout/TopBar';
 import Main from './components/layout/Main';
 import UploadPage from './components/upload/UploadPage';
+import { buildEnvelope, openEnvelope } from './crypto/envelope'
 
 function App() {
   const [qrCodeUrl, setQRCodeUrl] = useState(null);
   const [hasError, setError] = useState(null);
 
-
-  async function buildEnvelope(file) {
-    if (!isAscii(file)) {
-      throw new Error("The file name format is not supported, use only alphanumeric characters");
-    }
-
-    const fileNameLimit = 255;
-    if (file.name.length > fileNameLimit) {
-      throw new Error("The file name is too long > " + fileNameLimit);
-    }
-
-    const headerLength = 4;
-    const metadata = JSON.stringify({ "fileName": file.name, "mimeType": file.type || "application/octet-stream" });
-
-    const jsonMetadata = buildJsonMetadata();
-    const fileBytes = await buildFileBytes();
-    const header = buildHeader(jsonMetadata.length);
-
-    // building envelope
-    const envelopeLength = headerLength + jsonMetadata.length + fileBytes.length;
-    const envelope = new Uint8Array(envelopeLength);
-
-    envelope.set(header);
-    envelope.set(jsonMetadata, headerLength);
-    envelope.set(fileBytes, headerLength + jsonMetadata.length);
-
-    return envelope;
-
-    function isAscii(file) {
-      return new TextEncoder().encode(file.name).length == file.name.length;
-    }
-
-    async function buildFileBytes() {
-      const fileBuffer = await file.arrayBuffer();
-      const fileBytes = new Uint8Array(fileBuffer);
-      return fileBytes;
-    }
-
-    function buildJsonMetadata() {
-      const textEncoder = new TextEncoder();
-      const jsonMetadata = textEncoder.encode(metadata);
-      return jsonMetadata;
-    }
-
-    function buildHeader(metadataLength) {
-      const headerBuffer = new ArrayBuffer(4);
-      const view = new DataView(headerBuffer);
-      view.setUint32(0, metadataLength);
-      const header = new Uint8Array(headerBuffer);
-      return header;
-    }
-  }
 
   async function handleFile(files) {
     console.log("files", files);
@@ -142,13 +91,13 @@ function App() {
           const decodedIv = Uint8Array.fromBase64(iv);
           const envelop = await decrypt(encryptedBytes, decodedKey, decodedIv);
 
-          const { jsonMetadata, fileBytes } = splitEnvelope(envelop);
+          const { metadata, rawFile: data } = openEnvelope(envelop);
 
-          const blobUrl = URL.createObjectURL(new Blob([fileBytes], { type: jsonMetadata.mimeType }));
+          const blobUrl = URL.createObjectURL(new Blob([data], { type: metadata.mimeType }));
 
           const downloadLink = document.createElement("a");
           downloadLink.href = blobUrl;
-          downloadLink.download = jsonMetadata.fileName;
+          downloadLink.download = metadata.fileName;
           downloadLink.click();
           URL.revokeObjectURL(blobUrl);
         }
@@ -164,29 +113,6 @@ function App() {
         }
 
         setError(e.message ? e.message : "An unhandled error occured=" + e.constructor.name);
-      }
-
-      function splitEnvelope(decryptedEnvelope) {
-        try {
-          const metadataStartIndex = 4;
-          const envelopeBytes = new Uint8Array(decryptedEnvelope);
-          const metadataLength = envelopeBytes.subarray(0, metadataStartIndex);
-
-          // extracts metadata array length as integer value.
-          const metadataSize = new DataView(metadataLength.buffer, metadataLength.byteOffset, metadataLength.byteLength).getUint32(0);
-          const metadataEndIndex = metadataStartIndex + metadataSize;
-          if (metadataEndIndex > envelopeBytes.length) throw new Error("Envelope format violation detected");
-
-          const jsonBytes = envelopeBytes.subarray(metadataStartIndex, metadataEndIndex);
-          const jsonMetadata = JSON.parse(new TextDecoder().decode(jsonBytes));
-
-          const fileBytes = envelopeBytes.subarray(metadataEndIndex);
-
-          return { jsonMetadata, fileBytes };
-        } catch (e) {
-
-          throw new Error(e.message || "Error spliting envelope");
-        }
       }
     }
 
