@@ -1,5 +1,5 @@
 
-export default async function encrypt(envelope) {
+export default async function encrypt(envelope: ArrayBuffer) {
     const cryptoKey = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
     const rawKey = await crypto.subtle.exportKey("raw", cryptoKey);
 
@@ -11,7 +11,7 @@ export default async function encrypt(envelope) {
     return { cipherText, rawKey, iv }
 }
 
-export async function decrypt(bytes, key, iv) {
+export async function decrypt(bytes: ArrayBuffer, key: ArrayBuffer, iv: ArrayBuffer) {
 
     const cryptoKey = await crypto.subtle.importKey("raw", key, { name: 'AES-GCM' }, false, ["decrypt"]);
 

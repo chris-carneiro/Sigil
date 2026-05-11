@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "./built",
+    "allowJs": true,
+    "target": "es2020",
+    "lib": ["DOM", "ES2020"],
+    "jsx": "preserve",
+    "moduleResolution": "bundler"
+  },
+  "include": ["./src/**/*"]
+}

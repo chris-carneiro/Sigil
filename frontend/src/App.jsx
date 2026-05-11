@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import SelectFile from './components/upload/SelectFile'
 import encrypt, { decrypt } from './secure/encryption';
-import './secure/encryption'
 import { QRCodeSVG } from 'qrcode.react';
 import sigilLogo from './assets/sigil_mark_light.svg';
 import TopBar from './components/layout/TopBar';
@@ -220,7 +219,7 @@ function App() {
       {hasError && <p className="error">{hasError}</p>}
       <Main>
         <UploadPage>
-          <SelectFile onFileSelected={handleFile} />
+          <SelectFile onFilesSelected={handleFile} />
         </UploadPage>
       </Main>
     </>)
