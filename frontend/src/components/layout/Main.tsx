@@ -1,7 +1,10 @@
 import styles from './Main.module.css'
 
+type Content = {
+    children: React.ReactNode
+}
 
-function Main({ children }) {
+function Main({ children }: Content) {
 
     return (
         <main className={styles.main}>

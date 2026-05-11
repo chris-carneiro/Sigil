@@ -1,6 +1,10 @@
 import styles from './UploadPage.module.css';
 
-function UploadPage({ children }) {
+type UploadPageProps = {
+    children: React.ReactNode
+}
+
+function UploadPage({ children }: UploadPageProps) {
     return (
         <div className={styles.card}>
             {children}
