@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import SelectFile from './components/upload/SelectFile'
-import encrypt, { decrypt } from './secure/encryption';
+import { decrypt } from './crypto/decrypt';
+import { encrypt } from './crypto/encrypt'
 import { QRCodeSVG } from 'qrcode.react';
 import sigilLogo from './assets/sigil_mark_light.svg';
 import TopBar from './components/layout/TopBar';
@@ -45,6 +46,7 @@ function App() {
 
       const body = await response.json()
       const encodedKey = new Uint8Array(rawKey).toBase64({ alphabet: "base64url", omitPadding: true });
+      Uint8Array(rawKey).fill(0);
       const qrUrl = `${window.location.origin}/documents/download/${body.documentId}#${encodedKey}`;
 
       setQRCodeUrl(qrUrl);
