@@ -1,5 +1,11 @@
 
-export default async function encrypt(envelope: ArrayBuffer) {
+type EncryptedResult = {
+    cipherText: ArrayBuffer
+    rawKey: ArrayBuffer
+    iv: Uint8Array
+}
+
+export async function encrypt(envelope: BufferSource) : Promise<EncryptedResult> {
     const cryptoKey = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
     const rawKey = await crypto.subtle.exportKey("raw", cryptoKey);
 
@@ -10,13 +16,3 @@ export default async function encrypt(envelope: ArrayBuffer) {
 
     return { cipherText, rawKey, iv }
 }
-
-export async function decrypt(bytes: ArrayBuffer, key: ArrayBuffer, iv: ArrayBuffer) {
-
-    const cryptoKey = await crypto.subtle.importKey("raw", key, { name: 'AES-GCM' }, false, ["decrypt"]);
-
-    const plainText = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, bytes);
-    return plainText;
-}
-
-
