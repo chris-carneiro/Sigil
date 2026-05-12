@@ -11,7 +11,6 @@ function SelectFile({ onFilesSelected }: SelectFileProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     function handleSelectedFiles() {
-        console.log("ref current", inputRef.current);
         const input = inputRef.current;
 
         if (!input || !input.files) {

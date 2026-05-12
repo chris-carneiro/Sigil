@@ -21,7 +21,8 @@ export function DownloadPage() {
 
 
     async function handleDownload(documentId: string, key: string) {
-        dispatch({ type: 'clicked-download' })
+        dispatch({ type: 'clicked-download' });
+
         try {
             const { encryptedBytes, base64EncodedIV: iv } = await fetchDocument(documentId);
 
@@ -39,10 +40,10 @@ export function DownloadPage() {
             downloadLink.href = blobUrl;
             downloadLink.download = metadata.fileName;
             downloadLink.click();
-
-            dispatch({ type: 'fetched-document' })
             URL.revokeObjectURL(blobUrl);
 
+            dispatch({ type: 'fetched-document' });
+            
         } catch (e: any) {
 
             if (e instanceof TypeError) {
@@ -93,17 +94,14 @@ export function DownloadPage() {
     }
 
     if (state.status == 'error') {
-        const message = state.message;
         return (
             <>
                 <div>
-                    <p>{message}</p>
+                    <p>{state.message}</p>
                 </div>
             </>
         )
     }
-
-
 }
 
 function init(): DownloadState {
@@ -120,9 +118,10 @@ function init(): DownloadState {
             documentId: documentId,
         };
     }
+
     return {
         status: 'error',
-        message: 'This link is invalid or had expired'
+        message: 'This link is invalid or has expired'
     }
 }
 function reducer(state: DownloadState, action: DownloadAction): DownloadState {
@@ -143,7 +142,5 @@ function reducer(state: DownloadState, action: DownloadAction): DownloadState {
                 message: action.message
             }
         }
-
     }
-
 }
