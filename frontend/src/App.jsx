@@ -1,54 +1,13 @@
 import { useEffect, useState } from 'react';
-import SelectFile from './components/upload/SelectFile'
 import { decrypt } from './crypto/decrypt';
-import { encrypt } from './crypto/encrypt'
-import { QRCodeSVG } from 'qrcode.react';
-import sigilLogo from './assets/sigil_mark_light.svg';
 import TopBar from './components/layout/TopBar';
 import Main from './components/layout/Main';
 import UploadPage from './components/upload/UploadPage';
-import { buildEnvelope, openEnvelope } from './crypto/envelope'
-import { getDocument as fetchDocument, postDocument as uploadDocument } from './api/documents';
+import {  openEnvelope } from './crypto/envelope'
+import { getDocument as fetchDocument } from './api/documents';
 
 function App() {
-  const [qrCodeUrl, setQRCodeUrl] = useState(null);
   const [hasError, setError] = useState(null);
-
-
-  async function handleFile(files) {
-    console.log("files", files);
-    if (!files || files.length == 0) return;
-    const firstFile = files[0];
-    console.log("firstFile", firstFile);
-    if (!firstFile || !firstFile.name) return;
-
-    try {
-      const fileSizeLimit = 10000000;
-      if (firstFile.size > fileSizeLimit) throw new Error("File is too large");
-
-      const envelope = await buildEnvelope(firstFile);
-      const { cipherText, rawKey, iv } = await encrypt(envelope);
-
-      const formData = new FormData();
-
-      formData.append("document", new Blob([cipherText], { type: "application/octet-stream" }));
-      formData.append("iv", new Blob([iv], { type: "application/octet-stream" }));
-
-      const { documentId } = await uploadDocument(formData);
-      
-      const encodedKey = new Uint8Array(rawKey).toBase64({ alphabet: "base64url", omitPadding: true });
-      new Uint8Array(rawKey).fill(0);
-      const qrUrl = `${window.location.origin}/documents/download/${documentId}#${encodedKey}`;
-
-      setQRCodeUrl(qrUrl);
-    } catch (e) {
-      if (e instanceof TypeError) {
-        setError("The server could not be reached, check your connectivity")
-        return;
-      }
-      setError(e.message)
-    }
-  }
 
   function parseMetadata() {
 
@@ -70,9 +29,9 @@ function App() {
       try {
         const { documentId, key } = parseMetadata();
         if (documentId) {
-  
-          const {encryptedBytes, base64EncodedIV: iv} = await fetchDocument(documentId);
-          
+
+          const { encryptedBytes, base64EncodedIV: iv } = await fetchDocument(documentId);
+
           const decodedKey = Uint8Array.fromBase64(key, { alphabet: "base64url", omitPadding: true });
           const decodedIv = Uint8Array.fromBase64(iv);
           const envelop = await decrypt(encryptedBytes, decodedKey, decodedIv);
@@ -105,39 +64,14 @@ function App() {
     downloadDocument();
   }, []);
 
-
-
-  if (qrCodeUrl) return <QRCodeSVG
-    value={qrCodeUrl}
-    title="Scan to download private document"
-    size={512}
-    bgColor={"#F7F8F8"}
-    fgColor={"#37ACA8"}
-    level={"H"}
-    imageSettings={{
-      src: sigilLogo,
-      height: 128,
-      width: 128,
-      opacity: 1,
-      excavate: true,
-    }}
-  />
-
-
-
   return (
     <>
       <TopBar />
       {hasError && <p className="error">{hasError}</p>}
       <Main>
-        <UploadPage>
-          <SelectFile onFilesSelected={handleFile} />
-        </UploadPage>
+        <UploadPage />
       </Main>
     </>)
 }
-
-
-
 
 export default App
