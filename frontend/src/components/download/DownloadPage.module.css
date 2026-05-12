@@ -1,5 +1,5 @@
 .button {
-  width: 5em;
+  width: 7em;
   height: 5ex;
   background: linear-gradient(0.35turn, var(--color-accent-hover) 40%, var(--color-border));
 
@@ -8,4 +8,12 @@
   font-weight: bold;
   color: white;
   cursor: pointer;
+}
+
+.button:active {
+  box-shadow: 2px 2px 5px var(--color-accent-hover);
+}
+
+.button:hover {
+  background: var(--color-accent-hover);
 }

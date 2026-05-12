@@ -11,6 +11,7 @@ type UploadState =
     | { status: 'idle' }
     | { status: 'encrypting' }
     | { status: 'done'; qrUrl: string }
+    | { status: 'error'; message: string }
 
 type UploadAction =
     | { type: "selected-file"; files: File[] }
@@ -25,11 +26,13 @@ function UploadPage() {
     const [state, dispatch] = useReducer(reducer, initialState);
 
     async function handleFile(files: File[]) {
-        console.log("files", files);
-        if (!files || files.length == 0) return;
         const firstFile = files[0];
+
         console.log("firstFile", firstFile);
-        if (!firstFile || !firstFile.name) return;
+
+        if (!firstFile || !firstFile.name) {
+            throw new Error('Invalid file name');
+        }
 
         try {
             const fileSizeLimit = 10000000;
@@ -46,7 +49,9 @@ function UploadPage() {
             const { documentId } = await uploadDocument(formData);
 
             const encodedKey = new Uint8Array(rawKey).toBase64({ alphabet: "base64url", omitPadding: true });
+
             new Uint8Array(rawKey).fill(0);
+
             const qrUrl = `${window.location.origin}/documents/download/${documentId}#${encodedKey}`;
 
             dispatch({ type: 'succeeded-upload', qrUrl })
@@ -62,6 +67,7 @@ function UploadPage() {
     }
 
     function handleFilesSelected(files: File[]) {
+        if (!files || files.length == 0) return;
         dispatch({ type: 'selected-file', files: files });
 
         handleFile(files)
@@ -102,6 +108,12 @@ function UploadPage() {
         )
     }
 
+    if (state.status == 'error') {
+        return (
+            <div className={styles.card}>{state.message}</div>
+        )
+    }
+
     return (
         <div className={styles.card}>It's okay to be lost sometimes...</div>
     )
@@ -123,7 +135,8 @@ function reducer(state: UploadState, action: UploadAction): UploadState {
 
         case 'failed-upload': {
             return {
-                status: 'idle'
+                status: 'error',
+                message: action.message
             }
         }
     }
