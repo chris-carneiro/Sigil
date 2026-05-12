@@ -2,8 +2,8 @@
   "compilerOptions": {
     "outDir": "./built",
     "allowJs": true,
-    "target": "es2020",
-    "lib": ["DOM", "ES2020"],
+    "target": "es2025",
+    "lib": ["DOM", "ESNext"],
     "jsx": "preserve",
     "moduleResolution": "bundler"
   },

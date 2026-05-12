@@ -2,7 +2,7 @@
 type EncryptedResult = {
     cipherText: ArrayBuffer
     rawKey: ArrayBuffer
-    iv: Uint8Array
+    iv: Uint8Array<ArrayBuffer>
 }
 
 export async function encrypt(envelope: BufferSource) : Promise<EncryptedResult> {

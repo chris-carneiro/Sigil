@@ -1,7 +1,7 @@
 const HEADER_LENGTH = 4;
 
 
-export async function buildEnvelope(file: File): Promise<Uint8Array> {
+export async function buildEnvelope(file: File): Promise<Uint8Array<ArrayBuffer>> {
     if (!isAscii(file)) {
         throw new Error("The file name format is not supported, use only alphanumeric characters");
     }
