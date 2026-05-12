@@ -45,7 +45,6 @@ function UploadPage() {
 
             const { documentId } = await uploadDocument(formData);
 
-            // TODO: replace cast with native toBase64 once TypeScript DOM types include it
             const encodedKey = new Uint8Array(rawKey).toBase64({ alphabet: "base64url", omitPadding: true });
             new Uint8Array(rawKey).fill(0);
             const qrUrl = `${window.location.origin}/documents/download/${documentId}#${encodedKey}`;

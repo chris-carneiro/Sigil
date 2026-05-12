@@ -60,7 +60,7 @@ export type FileMetadata = {
 
 export type EnvelopeContents = {
     metadata: FileMetadata
-    rawFile: Uint8Array
+    rawFile: Uint8Array<ArrayBuffer>
 }
 
 export function openEnvelope(decryptedEnvelope: ArrayBuffer) : EnvelopeContents {
