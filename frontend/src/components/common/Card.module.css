@@ -1,0 +1,31 @@
+.card {
+    height: 30%;
+    min-height: 30%;
+    width: 35%;
+    min-width: 35%;
+    background-color: var(--color-surface);
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 5% 5%;
+}
+
+.danger {
+    border: 2px solid var(--color-danger);
+    background-color: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+    justify-content: center;
+    height: 10%;
+    min-height: 10%;
+    width: 25%;
+    min-width: 25%;
+}
+
+@media (max-width: 768px) {
+    .card {
+        width: 50%;
+        min-width: unset;
+    }
+}

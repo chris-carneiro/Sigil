@@ -6,17 +6,20 @@ import { encrypt } from '../../crypto/encrypt';
 import { postDocument as uploadDocument } from '../../api/documents';
 import { QRCodeSVG } from 'qrcode.react';
 import sigilLogo from '../../assets/sigil_mark_light.svg';
+import { Card } from '../common/Card';
+import { ErrorDisplay } from '../common/ErrorDisplay';
+import { AppError } from '../../types';
 
 type UploadState =
     | { status: 'idle' }
     | { status: 'encrypting' }
     | { status: 'done'; qrUrl: string }
-    | { status: 'error'; message: string }
+    | { status: 'error'; error: AppError }
 
 type UploadAction =
     | { type: "selected-file"; files: File[] }
     | { type: "succeeded-upload"; qrUrl: string }
-    | { type: "failed-upload"; message: string }
+    | { type: "failed-upload"; error: AppError }
 
 const initialState: UploadState = { status: 'idle' };
 
@@ -55,14 +58,17 @@ function UploadPage() {
             const qrUrl = `${window.location.origin}/documents/download/${documentId}#${encodedKey}`;
 
             dispatch({ type: 'succeeded-upload', qrUrl })
-        } catch (e: any) {
+        } catch (e: unknown) {
             if (e instanceof TypeError) {
 
-                dispatch({ type: 'failed-upload', message: "The server could not be reached, check your connectivity" })
+                dispatch({
+                    type: 'failed-upload', error: { code: 'network-error', message: "The server could not be reached, check your connectivity" }
+                })
                 return;
             }
 
-            dispatch({ type: 'failed-upload', message: e.message })
+            const message = e instanceof Error ? e.message : 'An unhandled error occurred';
+            dispatch({ type: 'failed-upload', error: { code: 'unknown-error', message: message } })
         }
     }
 
@@ -75,9 +81,9 @@ function UploadPage() {
 
     if (state.status == 'idle') {
         return (
-            <div className={styles.card}>
+            <Card>
                 <SelectFile onFilesSelected={handleFilesSelected} />
-            </div>
+            </Card>
         )
     }
 
@@ -89,7 +95,7 @@ function UploadPage() {
 
     if (state.status == 'done') {
         return (
-            <div className={styles.card}>
+            <Card>
                 <QRCodeSVG
                     value={state.qrUrl}
                     title="Scan to download private document"
@@ -104,18 +110,22 @@ function UploadPage() {
                         opacity: 1,
                         excavate: true,
                     }} />
-            </div>
+            </Card>
         )
     }
 
     if (state.status == 'error') {
         return (
-            <div className={styles.card}>{state.message}</div>
+            <Card variant="danger">
+                <ErrorDisplay error={state.error} />
+            </Card>
         )
     }
 
     return (
-        <div className={styles.card}>It's okay to be lost sometimes...</div>
+        <Card variant="danger">
+            <ErrorDisplay error={{ code: "unknown-error", message: "It's okay to be lost sometimes..." }} />
+        </Card>
     )
 }
 
@@ -136,7 +146,7 @@ function reducer(state: UploadState, action: UploadAction): UploadState {
         case 'failed-upload': {
             return {
                 status: 'error',
-                message: action.message
+                error: action.error
             }
         }
     }

@@ -3,18 +3,20 @@ import styles from './DownloadPage.module.css'
 import { getDocument as fetchDocument } from "../../api/documents";
 import { decrypt } from "../../crypto/decrypt";
 import { openEnvelope } from "../../crypto/envelope";
+import { Card } from "../common/Card";
+import { ErrorDisplay } from "../common/ErrorDisplay";
+import { AppError } from "../../types";
 
 type DownloadState =
     | { status: 'idle'; key: string; documentId: string }
     | { status: 'downloading' }
     | { status: 'done'; }
-    | { status: 'error'; message: string }
+    | { status: 'error'; error: AppError }
 
 type DownloadAction =
     | { type: 'clicked-download'; }
     | { type: 'fetched-document'; }
-    | { type: 'failed-download'; message: string }
-
+    | { type: 'failed-download'; error: AppError }
 
 export function DownloadPage() {
     const [state, dispatch] = useReducer(reducer, null, init)
@@ -43,20 +45,21 @@ export function DownloadPage() {
             URL.revokeObjectURL(blobUrl);
 
             dispatch({ type: 'fetched-document' });
-            
-        } catch (e: any) {
+
+        } catch (e: unknown) {
 
             if (e instanceof TypeError) {
-                dispatch({ type: 'failed-download', message: "The server returned invalid data, the document could not be recovered" });
+                dispatch({ type: 'failed-download', error: { code: 'network-error', message: "The server returned invalid data, the document could not be recovered" } });
                 return;
             }
 
             if (e instanceof DOMException && e.name === "OperationError") {
-                dispatch({ type: 'failed-download', message: "The document could not be recovered using the provided cryptographic properties" });
+                dispatch({ type: 'failed-download', error: { code: 'decryption-failed', message: "The document could not be recovered using the provided cryptographic properties" } });
                 return;
             }
 
-            dispatch({ type: 'failed-download', message: e.message ? e.message : "An unhandled error occured=" + e.constructor.name });
+            const message = e instanceof Error ? e.message : 'An unhandled error occurred';
+            dispatch({ type: 'failed-download', error: { code: 'unknown-error', message: message } });
 
         }
     }
@@ -64,42 +67,38 @@ export function DownloadPage() {
 
     if (state.status == 'idle') {
         return (
-            <>
-                <div>
-                    <button className={styles.button} type="button"
-                        onClick={() => handleDownload(state.documentId, state.key)} >Download</button>
-                </div>
-            </>
+            <Card>
+                <button className={styles.button} type="button"
+                    onClick={() => handleDownload(state.documentId, state.key)} >Download</button>
+            </Card>
         )
     }
 
     if (state.status == 'downloading') {
         return (
-            <>
+            <Card>
                 <div>
                     <p>Downloading...</p>
                 </div>
-            </>
+            </Card>
         )
     }
 
     if (state.status == 'done') {
         return (
-            <>
+            <Card>
                 <div>
                     <p>Done...</p>
                 </div>
-            </>
+            </Card>
         )
     }
 
     if (state.status == 'error') {
         return (
-            <>
-                <div>
-                    <p>{state.message}</p>
-                </div>
-            </>
+            <Card variant="danger">
+                <ErrorDisplay error={state.error} />
+            </Card>
         )
     }
 }
@@ -121,7 +120,7 @@ function init(): DownloadState {
 
     return {
         status: 'error',
-        message: 'This link is invalid or has expired'
+        error: { code: 'invalid-link', message: 'This link is invalid or has expired' }
     }
 }
 function reducer(state: DownloadState, action: DownloadAction): DownloadState {
@@ -139,7 +138,7 @@ function reducer(state: DownloadState, action: DownloadAction): DownloadState {
         case 'failed-download': {
             return {
                 status: 'error',
-                message: action.message
+                error: action.error
             }
         }
     }
