@@ -1,0 +1,28 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.code {
+    color: var(--color-danger);
+    letter-spacing: 2px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.message {
+    color: var(--color-text);
+    line-height: 1.6;
+    font-family: 'Syne', sans-serif;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .code {
+        font-size: 0.9rem;
+    }
+
+    .message {
+        font-size: 0.9rem;
+    }
+}
