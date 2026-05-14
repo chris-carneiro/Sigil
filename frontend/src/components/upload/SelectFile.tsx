@@ -22,7 +22,7 @@ function SelectFile({ onFilesSelected }: SelectFileProps) {
 
     return (
         <div>
-            <input ref={inputRef} type="file" />
+            <input className={styles.input} ref={inputRef} type="file" />
             <button className={styles.button} type="button"
                 onClick={handleSelectedFiles} >Upload</button>
         </div>

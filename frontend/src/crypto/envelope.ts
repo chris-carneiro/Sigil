@@ -63,7 +63,7 @@ export type EnvelopeContents = {
     rawFile: Uint8Array<ArrayBuffer>
 }
 
-export function openEnvelope(decryptedEnvelope: ArrayBuffer) : EnvelopeContents {
+export function openEnvelope(decryptedEnvelope: ArrayBuffer): EnvelopeContents {
     try {
 
         const envelopeBytes = new Uint8Array(decryptedEnvelope);
@@ -79,8 +79,8 @@ export function openEnvelope(decryptedEnvelope: ArrayBuffer) : EnvelopeContents 
         const data = envelopeBytes.subarray(metadataEndIndex);
 
         return { metadata, rawFile: data };
-    } catch (e: any) {
-
-        throw new Error(e.message || "Error spliting envelope");
+    } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Error splitting envelope"
+        throw new Error(message);
     }
 }

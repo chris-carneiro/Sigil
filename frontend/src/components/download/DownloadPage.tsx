@@ -37,7 +37,6 @@ export function DownloadPage() {
 
             const blobUrl = URL.createObjectURL(new Blob([data], { type: metadata.mimeType }));
 
-
             const downloadLink = document.createElement("a");
             downloadLink.href = blobUrl;
             downloadLink.download = metadata.fileName;
