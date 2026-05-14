@@ -1,7 +1,5 @@
 .card {
-    height: 30%;
-    min-height: 30%;
-    width: 35%;
+    min-height: 10%;
     min-width: 35%;
     background-color: var(--color-surface);
     box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.15);
@@ -9,8 +7,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
-    padding: 5% 5%;
+    justify-content: center;
+    padding: 2% 2%;
 }
 
 .danger {
@@ -25,7 +23,7 @@
 
 @media (max-width: 768px) {
     .card {
-        width: 50%;
-        min-width: unset;
+        width: 90%;
+        min-width: 300px;
     }
 }

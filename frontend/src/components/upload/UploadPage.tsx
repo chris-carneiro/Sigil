@@ -1,14 +1,12 @@
 import { useReducer } from 'react';
 import SelectFile from './SelectFile';
-import styles from './UploadPage.module.css';
 import { buildEnvelope } from '../../crypto/envelope';
 import { encrypt } from '../../crypto/encrypt';
 import { postDocument as uploadDocument } from '../../api/documents';
-import { QRCodeSVG } from 'qrcode.react';
-import sigilLogo from '../../assets/sigil_mark_light.svg';
 import { Card } from '../common/Card';
 import { ErrorDisplay } from '../common/ErrorDisplay';
 import { AppError } from '../../types';
+import { QRCodeDisplay } from './QRCodeDisplay';
 
 type UploadState =
     | { status: 'idle' }
@@ -72,11 +70,11 @@ function UploadPage() {
         }
     }
 
-    function handleFilesSelected(files: File[]) {
+    async function handleFilesSelected(files: File[]) {
         if (!files || files.length == 0) return;
         dispatch({ type: 'selected-file', files: files });
 
-        handleFile(files)
+        await handleFile(files)
     }
 
     if (state.status == 'idle') {
@@ -88,28 +86,17 @@ function UploadPage() {
     }
 
     if (state.status == 'encrypting') {
-        return (<div className={styles.card}>
-            <p>Encrypting...</p>
-        </div>)
+        return (
+            <Card>
+                <p>Encrypting...</p>
+            </Card>
+        )
     }
 
     if (state.status == 'done') {
         return (
             <Card>
-                <QRCodeSVG
-                    value={state.qrUrl}
-                    title="Scan to download private document"
-                    size={512}
-                    bgColor={"#F7F8F8"}
-                    fgColor={"#37ACA8"}
-                    level={"H"}
-                    imageSettings={{
-                        src: sigilLogo,
-                        height: 128,
-                        width: 128,
-                        opacity: 1,
-                        excavate: true,
-                    }} />
+                <QRCodeDisplay url={state.qrUrl} />
             </Card>
         )
     }
