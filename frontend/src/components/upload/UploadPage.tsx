@@ -8,9 +8,11 @@ import { ErrorDisplay } from '../common/ErrorDisplay';
 import { AppError } from '../../types';
 import { QRCodeDisplay } from './QRCodeDisplay';
 import { FileDropzone } from './FileDropzone';
+import { Button } from '../common/Button';
+import styles from './UploadPage.module.css';
 
 type UploadState =
-    | { status: 'idle' }
+    | { status: 'idle'; stagedFiles?: File[] }
     | { status: 'encrypting' }
     | { status: 'done'; qrUrl: string }
     | { status: 'error'; error: AppError }
@@ -27,16 +29,15 @@ function UploadPage() {
 
     const [state, dispatch] = useReducer(reducer, initialState);
 
-    async function handleFile(files: File[]) {
+    async function handleUpload(files: File[]) {
         const firstFile = files[0];
 
-        console.log("firstFile", firstFile);
-
-        if (!firstFile || !firstFile.name) {
-            throw new Error('Invalid file name');
-        }
-
         try {
+
+            if (!firstFile || !firstFile.name) {
+                throw new Error('Invalid file name');
+            }
+
             const fileSizeLimit = 10000000;
             if (firstFile.size > fileSizeLimit) throw new Error("File is too large");
 
@@ -71,20 +72,24 @@ function UploadPage() {
         }
     }
 
-    async function handleFilesSelected(files: File[]) {
+    function handleFilesSelected(files: File[]) {
         if (!files || files.length == 0) return;
         dispatch({ type: 'selected-file', files: files });
-
-        await handleFile(files)
     }
 
     if (state.status == 'idle') {
         return (
-            <Card>
-                <FileDropzone onFilesSelected={handleFilesSelected}>
-                    <SelectFile onFilesSelected={handleFilesSelected} />
-                </FileDropzone>
-            </Card>
+            <div className={styles.uploadBox}>
+                <Card>
+                    <FileDropzone onFilesDropped={handleFilesSelected}>
+                        <SelectFile onFilesSelected={handleFilesSelected} />
+                    </FileDropzone>
+
+                </Card>
+                <Button onClick={() => handleUpload(state.stagedFiles ?? [])} className={styles.uploadButton}
+                visible={(state.stagedFiles?.length ?? 0) > 0}
+                    label='Upload' />
+            </div >
         )
     }
 
@@ -123,7 +128,8 @@ function reducer(state: UploadState, action: UploadAction): UploadState {
     switch (action.type) {
         case 'selected-file': {
             return {
-                status: 'encrypting'
+                status: 'idle',
+                stagedFiles: action.files
             }
         }
         case 'succeeded-upload': {

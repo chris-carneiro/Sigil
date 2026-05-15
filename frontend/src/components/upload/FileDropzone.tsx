@@ -1,30 +1,30 @@
-import { useState } from "react";
+import { DragEvent, useState } from "react";
 import styles from './FileDropzone.module.css'
 
 
 type FileDropzoneProps = {
-    onFilesSelected: (files: File[]) => void;
+    onFilesDropped: (files: File[]) => void;
     children: React.ReactNode
 }
 
 export function FileDropzone(props: FileDropzoneProps) {
     const [isDragOver, setIsDragOver] = useState(false);
 
-    function handleDrop(event: React.DragEvent) {
+    function handleDrop(event: DragEvent<HTMLDivElement>) {
         event.preventDefault();
         setIsDragOver(false);
         const files: File[] = Array.from(event.dataTransfer.files);
         if (files.length > 0) {
-            props.onFilesSelected(files);
+            props.onFilesDropped(files);
         }
-
     }
+
     return (
         <div className={`${styles.dropzone} ${isDragOver ? styles.dragover : ''}`} id="drop-target"
             onDragOver={(event) => {
                 event.preventDefault();
             }}
-            onDragEnter={(event) => {
+            onDragEnter={() => {
                 setIsDragOver(true);
             }}
 
@@ -33,9 +33,10 @@ export function FileDropzone(props: FileDropzoneProps) {
                     setIsDragOver(false);
                 }
             }}
-            onDrop={handleDrop}
-        >
+            onDrop={handleDrop}>
             {props.children}
         </div>
     )
+
+
 } 
