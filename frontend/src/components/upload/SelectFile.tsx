@@ -21,14 +21,12 @@ function SelectFile({ onFilesSelected }: SelectFileProps) {
     }
 
     return (
-        <div>
-            <label id="drop-zone">
+        <div className={styles.container}>
+            <label className={styles.label}>
                 Drop files here, or click to upload.
-                <input className={styles.fileInput} ref={inputRef} type="file" />
+                <input className={styles.fileInput} ref={inputRef} type="file" 
+                onChange={handleSelectedFiles}/>
             </label>
-            <button className={styles.button} type="button"
-                onClick={handleSelectedFiles}>Upload
-            </button>
         </div>
     );
 }

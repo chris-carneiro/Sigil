@@ -1,0 +1,22 @@
+.button {
+    padding: 1em;
+    background: linear-gradient(0.35turn, var(--color-accent-hover) 40%, var(--color-border));
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    color: white;
+    opacity: 0;
+    transition: opacity 200ms ease;
+}
+
+.visible {
+    opacity: 1;
+}
+
+.button:active {
+    box-shadow: 2px 2px 5px var(--color-accent-hover);
+}
+
+.button:hover {
+    background: var(--color-accent-hover);
+}

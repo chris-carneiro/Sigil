@@ -227,25 +227,29 @@ transitions between them explicit?"* Surface missing states before reviewing vis
 src/
   components/
     layout/
-      TopBar.jsx              ← Wordmark + logo mark. No navigation in v1.
+      TopBar.tsx              ← Wordmark + logo mark. No navigation in v1.
     upload/
-      UploadPage.jsx          ← Route component. Owns upload state machine (useReducer).
-      FileDropzone.jsx        ← Drag-and-drop target. Fires onFile(file) only — no crypto here.
-      EncryptingIndicator.jsx ← Logo animation + status text during encryption.
-      QRCodeDisplay.jsx       ← QR code + document ID. Receives pre-built URL string as prop.
+      UploadPage.tsx          ← Route component. Owns upload state machine (useReducer). Five states: idle, selected, encrypting, done, error.
+      FileDropzone.tsx        ← Drag-and-drop target. Wraps SelectFile. onDragLeave uses relatedTarget check to prevent false resets on child hover. Fires onFilesSelected(files) — no crypto, no upload.
+      SelectFile.tsx          ← Hidden file input + label. Fires onFilesSelected on input change — not on button click.
+      UploadButton.tsx        ← Confirmation button. Receives staged File; triggers upload on click. Shared between SelectFile and drop paths. (planned)
+      EncryptingIndicator.tsx ← Logo animation + status text during encryption. (planned — ADR required for animation style)
+      QRCodeDisplay.tsx       ← QR code + document ID. Receives pre-built URL string as prop.
+    common/
+      Card.tsx                ← Shared surface component. variant: 'default' | 'danger'.
+      ErrorDisplay.tsx        ← Unified error surface. Receives { code, message } — no raw errors in JSX.
     download/
-      DownloadPage.jsx        ← Route component. Reads fragment, imports key, fetches, decrypts.
-      DecryptingIndicator.jsx ← Status text during decryption.
-      ErrorDisplay.jsx        ← Unified error surface. Receives { code, message } — no raw errors in JSX.
+      DownloadPage.tsx        ← Route component. Reads fragment, imports key, fetches, decrypts.
+      DecryptingIndicator.tsx ← Status text during decryption. (planned)
   crypto/
-    encrypt.js   ← encryptFile(file) → { ciphertext: ArrayBuffer, iv: Uint8Array, keyBytes: ArrayBuffer }
-    decrypt.js   ← decryptFile(ciphertext, iv, keyBytes) → Blob
-    envelope.js  ← buildEnvelope(file) → ArrayBuffer; parseEnvelope(buffer) → { fileName, mimeType, fileBytes }
+    encrypt.ts   ← encryptFile(file) → { ciphertext: ArrayBuffer, iv: Uint8Array, keyBytes: ArrayBuffer }
+    decrypt.ts   ← decryptFile(ciphertext, iv, keyBytes) → Blob
+    envelope.ts  ← buildEnvelope(file) → ArrayBuffer; parseEnvelope(buffer) → { fileName, mimeType, fileBytes }
   api/
-    documents.js ← uploadDocument(formData) → { documentId }; downloadDocument(documentId) → { blob, iv }
+    documents.ts ← uploadDocument(formData) → { documentId }; downloadDocument(documentId) → { blob, iv }
   styles/
     variables.css  ← :root { --color-*, --font-* }. Single source of truth for all design tokens.
-    global.css     ← Reset, font-face imports, body defaults.
+    global.css     ← Universal box-sizing: border-box reset, font-face imports, body defaults.
 ```
 
 **Separation of concerns — the only permitted directions are:**
@@ -264,6 +268,11 @@ api/ → fetch only — no React, no crypto
 - Crypto key material stored anywhere other than a `useRef` in the page component
 - Raw `Error` objects rendered in JSX — all errors must pass through `ErrorDisplay`
 - Design tokens hardcoded in a component file instead of referenced via CSS custom properties
+
+**Known limitations (v1 — to be resolved):**
+
+- Drag-and-drop currently triggers upload immediately on drop, bypassing the confirmation step that exists on the `SelectFile` path. The two paths must be harmonised: drop should stage the file into the `selected` state and wait for an explicit `UploadButton` click, same as click-to-browse. The `UploadButton` extraction and `selected` reducer state are the planned fix.
+- Drag-and-drop supports a single file only. When multiple files are dropped, `files[0]` is used and the rest are silently discarded. If a file is already staged, a subsequent drop replaces it.
 
 ---
 
