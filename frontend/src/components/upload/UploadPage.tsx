@@ -7,6 +7,7 @@ import { Card } from '../common/Card';
 import { ErrorDisplay } from '../common/ErrorDisplay';
 import { AppError } from '../../types';
 import { QRCodeDisplay } from './QRCodeDisplay';
+import { FileDropzone } from './FileDropzone';
 
 type UploadState =
     | { status: 'idle' }
@@ -80,7 +81,9 @@ function UploadPage() {
     if (state.status == 'idle') {
         return (
             <Card>
-                <SelectFile onFilesSelected={handleFilesSelected} />
+                <FileDropzone onFilesSelected={handleFilesSelected}>
+                    <SelectFile onFilesSelected={handleFilesSelected} />
+                </FileDropzone>
             </Card>
         )
     }

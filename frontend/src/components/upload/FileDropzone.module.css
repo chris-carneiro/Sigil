@@ -1,0 +1,15 @@
+.dropzone {
+    width: 100%;
+    padding: 2.5rem;
+    display: flex;
+    color: var(--color-text);
+    align-items: center;
+    justify-content: center;
+}
+
+.dragover {
+    border: dashed 2px;
+    border-radius: 16px;
+    border-color: var(--color-accent);
+    background-color: color-mix(in srgb, var(--color-accent) 5%, transparent)
+}
