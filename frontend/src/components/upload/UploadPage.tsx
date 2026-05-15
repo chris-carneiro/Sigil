@@ -10,6 +10,7 @@ import { QRCodeDisplay } from './QRCodeDisplay';
 import { FileDropzone } from './FileDropzone';
 import { Button } from '../common/Button';
 import styles from './UploadPage.module.css';
+import { SelectedFileList } from './SelectedFileList';
 
 type UploadState =
     | { status: 'idle'; stagedFiles?: File[] }
@@ -20,6 +21,7 @@ type UploadState =
 type UploadAction =
     | { type: "selected-file"; files: File[] }
     | { type: "succeeded-upload"; qrUrl: string }
+    | { type: "deleted-file"; file: File }
     | { type: "failed-upload"; error: AppError }
 
 const initialState: UploadState = { status: 'idle' };
@@ -31,15 +33,19 @@ function UploadPage() {
 
     async function handleUpload(files: File[]) {
         const firstFile = files[0];
+        const fileSizeLimit = 10000000;
 
         try {
 
             if (!firstFile || !firstFile.name) {
-                throw new Error('Invalid file name');
+                dispatch({ type: 'failed-upload', error: { code: 'unsupported-file', message: "Invalid file name" } });
+                return;
             }
 
-            const fileSizeLimit = 10000000;
-            if (firstFile.size > fileSizeLimit) throw new Error("File is too large");
+            if (firstFile.size > fileSizeLimit) {
+                dispatch({ type: 'failed-upload', error: { code: 'unsupported-file', message: "File is too large" } });
+                return;
+            }
 
             const envelope = await buildEnvelope(firstFile);
             const { cipherText, rawKey, iv } = await encrypt(envelope);
@@ -58,6 +64,7 @@ function UploadPage() {
             const qrUrl = `${window.location.origin}/documents/download/${documentId}#${encodedKey}`;
 
             dispatch({ type: 'succeeded-upload', qrUrl })
+
         } catch (e: unknown) {
             if (e instanceof TypeError) {
 
@@ -78,16 +85,19 @@ function UploadPage() {
     }
 
     if (state.status == 'idle') {
+        const stagedFiles = state.stagedFiles ?? [];
         return (
             <div className={styles.uploadBox}>
                 <Card>
                     <FileDropzone onFilesDropped={handleFilesSelected}>
                         <SelectFile onFilesSelected={handleFilesSelected} />
                     </FileDropzone>
-
+                    <SelectedFileList files={stagedFiles} onDelete={(file) => {
+                        dispatch({ type: 'deleted-file', file: file })
+                    }} />
                 </Card>
                 <Button onClick={() => handleUpload(state.stagedFiles ?? [])} className={styles.uploadButton}
-                visible={(state.stagedFiles?.length ?? 0) > 0}
+                    visible={(state.stagedFiles?.length ?? 0) > 0}
                     label='Upload' />
             </div >
         )
@@ -132,6 +142,15 @@ function reducer(state: UploadState, action: UploadAction): UploadState {
                 stagedFiles: action.files
             }
         }
+
+        case 'deleted-file': {
+            if (state.status !== 'idle') return state;
+            return {
+                status: 'idle',
+                stagedFiles: state.stagedFiles?.filter(file => file.name !== action.file.name)
+            }
+        }
+
         case 'succeeded-upload': {
             return {
                 status: 'done',
@@ -145,6 +164,7 @@ function reducer(state: UploadState, action: UploadAction): UploadState {
                 error: action.error
             }
         }
+
     }
 }
 
