@@ -24,8 +24,8 @@ function SelectFile({ onFilesSelected }: SelectFileProps) {
         <div className={styles.container}>
             <label className={styles.label}>
                 Drop files here, or click to upload.
-                <input className={styles.fileInput} ref={inputRef} type="file" 
-                onChange={handleSelectedFiles}/>
+                <input className={styles.fileInput} ref={inputRef} type="file"
+                    onChange={handleSelectedFiles} />
             </label>
         </div>
     );

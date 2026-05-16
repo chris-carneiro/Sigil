@@ -11,6 +11,7 @@ import { FileDropzone } from './FileDropzone';
 import { Button } from '../common/Button';
 import styles from './UploadPage.module.css';
 import { SelectedFileList } from './SelectedFileList';
+import { EncryptingIndicator } from '../common/EncryptingIndicator';
 
 type UploadState =
     | { status: 'idle'; stagedFiles?: File[] }
@@ -20,6 +21,7 @@ type UploadState =
 
 type UploadAction =
     | { type: "selected-file"; files: File[] }
+    | { type: "encrypted-file"; }
     | { type: "succeeded-upload"; qrUrl: string }
     | { type: "deleted-file"; file: File }
     | { type: "failed-upload"; error: AppError }
@@ -32,6 +34,7 @@ function UploadPage() {
     const [state, dispatch] = useReducer(reducer, initialState);
 
     async function handleUpload(files: File[]) {
+        dispatch({ type: 'encrypted-file' })
         const firstFile = files[0];
         const fileSizeLimit = 10000000;
 
@@ -90,13 +93,14 @@ function UploadPage() {
             <div className={styles.uploadBox}>
                 <Card>
                     <FileDropzone onFilesDropped={handleFilesSelected}>
-                        <SelectFile onFilesSelected={handleFilesSelected} />
+                        <SelectFile  key={stagedFiles.length} onFilesSelected={handleFilesSelected} />
                     </FileDropzone>
                     <SelectedFileList files={stagedFiles} onDelete={(file) => {
                         dispatch({ type: 'deleted-file', file: file })
                     }} />
                 </Card>
-                <Button onClick={() => handleUpload(state.stagedFiles ?? [])} className={styles.uploadButton}
+                <Button onClick={() => handleUpload(state.stagedFiles ?? [])}
+                    className={styles.uploadButton}
                     visible={(state.stagedFiles?.length ?? 0) > 0}
                     label='Upload' />
             </div >
@@ -104,9 +108,10 @@ function UploadPage() {
     }
 
     if (state.status == 'encrypting') {
+        console.log('Rendering encrypting state');
         return (
             <Card>
-                <p>Encrypting...</p>
+                <EncryptingIndicator />
             </Card>
         )
     }
@@ -143,18 +148,26 @@ function reducer(state: UploadState, action: UploadAction): UploadState {
             }
         }
 
-        case 'deleted-file': {
-            if (state.status !== 'idle') return state;
+        case 'encrypted-file': {
+             console.log('Setting status to encrypting');
             return {
-                status: 'idle',
-                stagedFiles: state.stagedFiles?.filter(file => file.name !== action.file.name)
+                status: 'encrypting'
             }
         }
+
 
         case 'succeeded-upload': {
             return {
                 status: 'done',
                 qrUrl: action.qrUrl
+            }
+        }
+
+        case 'deleted-file': {
+            if (state.status !== 'idle') return state;
+            return {
+                status: 'idle',
+                stagedFiles: state.stagedFiles?.filter(file => file.name !== action.file.name)
             }
         }
 
