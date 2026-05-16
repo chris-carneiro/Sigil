@@ -11,8 +11,9 @@ import { FileDropzone } from './FileDropzone';
 import { Button } from '../common/Button';
 import styles from './UploadPage.module.css';
 import { SelectedFileList } from './SelectedFileList';
-import { EncryptingIndicator } from '../common/EncryptingIndicator';
+import { SigilIndicator } from '../common/SigilIndicator';
 import { withMinimumDuration } from '../utils/async';
+import { DocumentId } from '../common/DocumentId';
 
 type UploadState =
     | { status: 'idle'; stagedFiles?: File[] }
@@ -95,7 +96,7 @@ function UploadPage() {
         const stagedFiles = state.stagedFiles ?? [];
         return (
             <div className={styles.uploadBox}>
-                <Card>
+                <Card className={styles.uploadCard}>
                     <FileDropzone onFilesDropped={handleFilesSelected}>
                         <SelectFile key={stagedFiles.length} onFilesSelected={handleFilesSelected} />
                     </FileDropzone>
@@ -103,10 +104,12 @@ function UploadPage() {
                         dispatch({ type: 'deleted-file', file: file })
                     }} />
                 </Card>
-                <Button onClick={() => handleUpload(state.stagedFiles ?? [])}
-                    className={styles.uploadButton}
-                    visible={(state.stagedFiles?.length ?? 0) > 0}
-                    label='Upload' />
+                <div className={`${styles.buttonContainer} 
+                ${(state.stagedFiles?.length ?? 0) > 0   ? '' : styles.hidden}`}>
+                    <Button onClick={() => handleUpload(state.stagedFiles ?? [])}
+                        className={styles.uploadButton}
+                        label='Upload' />
+                </div>
             </div >
         )
     }
@@ -117,16 +120,15 @@ function UploadPage() {
             <>
                 <Card className={styles.visualArea}>
                     <div className={`${styles.layer} ${state.status !== 'encrypting' ? styles.hidden : ''}`}>
-                        <EncryptingIndicator />
+                        <SigilIndicator label='Encrypting...' alt='Encrypting before uploading.' />
                     </div>
                     <div className={`${styles.layer} ${state.status !== 'done' ? styles.hidden : ''}`}>
                         <QRCodeDisplay url={state.status === 'done' ? state.qrUrl : ''} />
                     </div>
 
                 </Card>
-                <div className={`${styles.documentId} ${state.status !== 'done' ? styles.hidden : ''}`} >
-                    <span >{`${state.status === 'done' ? new URL(state.qrUrl).pathname.split('/').at(-1) : ''}`}</span>
-                </div>
+                <DocumentId documentId={`${state.status === 'done' ? new URL(state.qrUrl).pathname.split('/').at(-1) : ''}`}
+                    className={state.status !== 'done' ? styles.hidden : ''} />
             </>
         )
     }

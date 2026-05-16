@@ -1,3 +1,11 @@
+.buttonContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    transition: opacity 500ms ease;
+    min-height: 45px;
+}
+
 .uploadButton {
     min-width: 80%;
     text-align: center;
@@ -9,7 +17,6 @@
     align-items: center;
     gap: 1rem;
 }
-
 
 .visualArea {
     min-height: 455px;
@@ -31,15 +38,6 @@
     pointer-events: none;
 }
 
-.documentId {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    letter-spacing: var(--tracking-wide);
-    text-align: center;
-    opacity: 1;
-    margin: 1rem;
-    white-space: nowrap;
-    min-height: 18px;
+.uploadCard {
+    justify-content: flex-start;
 }

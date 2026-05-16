@@ -1,5 +1,6 @@
 .card {
-    min-height: 10%;
+    min-height: 280px;
+    height: auto;
     min-width: 35%;
     background-color: var(--color-surface);
     box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.15);

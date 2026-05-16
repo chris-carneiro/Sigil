@@ -1,20 +1,18 @@
 import styles from './Button.module.css'
 
 
-type ButtonProps = {
-    onClick?: (() => void);
+type ButtonProps = Omit<React.ComponentPropsWithoutRef<'button'>, 'className'> & {
     label: string;
-    visible?: boolean;
     className?: string;
 }
 
-export function Button(props: ButtonProps) {
+export function Button({ label, className, ...rest }: ButtonProps) {
     return (
-        <button onClick={props.onClick} className={
-            `${styles.button} ${props.className ?? ''}  ${props.visible ? styles.visible : ''}`
+        <button {...rest} className={
+            `${styles.button} ${className ?? ''}`
         }
             type="button">
-            {props.label}
+            {label}
         </button>
     )
 }
