@@ -1,6 +1,6 @@
 .uploadButton {
     min-width: 80%;
-    text-align : center;
+    text-align: center;
 }
 
 .uploadBox {
@@ -8,4 +8,38 @@
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+}
+
+
+.visualArea {
+    min-height: 455px;
+    min-width: 420px;
+    position: relative;
+}
+
+.layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 500ms ease;
+}
+
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.documentId {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    letter-spacing: var(--tracking-wide);
+    text-align: center;
+    opacity: 1;
+    margin: 1rem;
+    white-space: nowrap;
+    min-height: 18px;
 }

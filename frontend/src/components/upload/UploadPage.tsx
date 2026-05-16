@@ -12,6 +12,7 @@ import { Button } from '../common/Button';
 import styles from './UploadPage.module.css';
 import { SelectedFileList } from './SelectedFileList';
 import { EncryptingIndicator } from '../common/EncryptingIndicator';
+import { withMinimumDuration } from '../utils/async';
 
 type UploadState =
     | { status: 'idle'; stagedFiles?: File[] }
@@ -51,7 +52,10 @@ function UploadPage() {
             }
 
             const envelope = await buildEnvelope(firstFile);
-            const { cipherText, rawKey, iv } = await encrypt(envelope);
+            const { cipherText, rawKey, iv } = await withMinimumDuration(
+                encrypt(envelope),
+                2000
+            );
 
             const formData = new FormData();
 
@@ -93,7 +97,7 @@ function UploadPage() {
             <div className={styles.uploadBox}>
                 <Card>
                     <FileDropzone onFilesDropped={handleFilesSelected}>
-                        <SelectFile  key={stagedFiles.length} onFilesSelected={handleFilesSelected} />
+                        <SelectFile key={stagedFiles.length} onFilesSelected={handleFilesSelected} />
                     </FileDropzone>
                     <SelectedFileList files={stagedFiles} onDelete={(file) => {
                         dispatch({ type: 'deleted-file', file: file })
@@ -107,20 +111,23 @@ function UploadPage() {
         )
     }
 
-    if (state.status == 'encrypting') {
-        console.log('Rendering encrypting state');
-        return (
-            <Card>
-                <EncryptingIndicator />
-            </Card>
-        )
-    }
+    if (state.status === 'encrypting' || state.status == 'done') {
 
-    if (state.status == 'done') {
         return (
-            <Card>
-                <QRCodeDisplay url={state.qrUrl} />
-            </Card>
+            <>
+                <Card className={styles.visualArea}>
+                    <div className={`${styles.layer} ${state.status !== 'encrypting' ? styles.hidden : ''}`}>
+                        <EncryptingIndicator />
+                    </div>
+                    <div className={`${styles.layer} ${state.status !== 'done' ? styles.hidden : ''}`}>
+                        <QRCodeDisplay url={state.status === 'done' ? state.qrUrl : ''} />
+                    </div>
+
+                </Card>
+                <div className={`${styles.documentId} ${state.status !== 'done' ? styles.hidden : ''}`} >
+                    <span >{`${state.status === 'done' ? new URL(state.qrUrl).pathname.split('/').at(-1) : ''}`}</span>
+                </div>
+            </>
         )
     }
 
@@ -149,7 +156,6 @@ function reducer(state: UploadState, action: UploadAction): UploadState {
         }
 
         case 'encrypted-file': {
-             console.log('Setting status to encrypting');
             return {
                 status: 'encrypting'
             }

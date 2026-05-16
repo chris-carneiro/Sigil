@@ -6,7 +6,7 @@ export function EncryptingIndicator() {
     return (
         <div className={styles.container}>
             <img className={styles.logo} src={sigilMark} alt="Encrypting before uploading." />
-            <p>Encrypting...</p>
+            <p className={styles.p}>Encrypting...</p>
         </div>
     )
 }

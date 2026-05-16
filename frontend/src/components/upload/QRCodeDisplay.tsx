@@ -7,33 +7,28 @@ type QRCodeDisplayProps = {
 }
 
 export function QRCodeDisplay(props: QRCodeDisplayProps) {
+    if (!props.url) return null;
 
     const accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
     const bg = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
-
-    const documentId = new URL(props.url).pathname.split('/').at(-1);
-
     return (
         <>
             <div className={styles.container}>
                 <QRCodeSVG
                     value={props.url}
                     title="Scan to download private document"
-                    size={512}
-                    style={{ width: '80%', height: 'auto' }}
+                    size={280}
+                    style={{ width: '100%', aspectRatio: '1' }}
                     bgColor={bg}
                     fgColor={accent}
                     level={"H"}
                     imageSettings={{
                         src: sigilLogo,
-                        height: 128,
-                        width: 128,
+                        height: 68,
+                        width: 68,
                         opacity: 1,
                         excavate: true,
                     }} />
-            </div>
-            <div className={styles.documentId}>
-                <span >{documentId}</span>
             </div>
         </>
     )
