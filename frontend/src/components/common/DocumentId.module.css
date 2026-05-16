@@ -1,0 +1,11 @@
+.documentId {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    letter-spacing: var(--tracking-wide);
+    text-align: center;
+    margin: 1rem;
+    white-space: nowrap;
+    min-height: 18px;
+}

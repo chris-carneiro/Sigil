@@ -5,6 +5,7 @@
     color: var(--color-text);
     align-items: center;
     justify-content: center;
+    margin-top: 2rem;
 }
 
 .dragover {

@@ -6,6 +6,9 @@ import { openEnvelope } from "../../crypto/envelope";
 import { Card } from "../common/Card";
 import { ErrorDisplay } from "../common/ErrorDisplay";
 import { AppError } from "../../types";
+import { SigilIndicator } from "../common/SigilIndicator";
+import { DocumentId } from "../common/DocumentId";
+import { Button } from "../common/Button";
 
 type DownloadState =
     | { status: 'idle'; key: string; documentId: string }
@@ -66,9 +69,12 @@ export function DownloadPage() {
 
     if (state.status == 'idle') {
         return (
-            <Card>
-                <button className={styles.button} type="button"
-                    onClick={() => handleDownload(state.documentId, state.key)} >Download</button>
+            <Card className={styles.card}>
+                <div className={styles.info}>
+                    <span>You've received a document privately sent:</span>
+                </div>
+                <DocumentId documentId={state.documentId} />
+                <Button label="Download & Decrypt" onClick={() => handleDownload(state.documentId, state.key)} />
             </Card>
         )
     }
@@ -76,9 +82,7 @@ export function DownloadPage() {
     if (state.status == 'downloading') {
         return (
             <Card>
-                <div>
-                    <p>Downloading...</p>
-                </div>
+                <SigilIndicator label="Downloading..." alt="Downloading & Decrypting" />
             </Card>
         )
     }

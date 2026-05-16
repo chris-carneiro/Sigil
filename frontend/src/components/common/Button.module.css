@@ -5,13 +5,8 @@
     border-radius: 5px;
     font-weight: bold;
     color: white;
-    opacity: 0;
-    transition: opacity 200ms ease;
 }
 
-.visible {
-    opacity: 1;
-}
 
 .button:active {
     box-shadow: 2px 2px 5px var(--color-accent-hover);
