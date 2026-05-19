@@ -19,8 +19,8 @@
 }
 
 .visualArea {
-    min-height: 455px;
-    min-width: 420px;
+    min-height: 400px;
+    min-width: 400px;
     position: relative;
 }
 
@@ -40,4 +40,36 @@
 
 .uploadCard {
     justify-content: flex-start;
+}
+
+.warnUser {
+    display: flex;
+    margin: 1rem;
+    align-items: center;
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+}
+
+.copyContainer {
+    display: flex;
+    place-items: center;
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    gap: 0.5rem;
+}
+
+.iconButton {
+    background: transparent;
+    padding: 0.5rem;
+}
+
+.iconButton:hover {
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.iconButton:active {
+    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    box-shadow: none;
 }
