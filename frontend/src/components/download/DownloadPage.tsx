@@ -9,6 +9,8 @@ import { AppError } from "../../types";
 import { SigilIndicator } from "../common/SigilIndicator";
 import { DocumentId } from "../common/DocumentId";
 import { Button } from "../common/Button";
+import { withMinimumDuration } from '../utils/async'
+import { useNavigate } from "react-router-dom";
 
 type DownloadState =
     | { status: 'idle'; key: string; documentId: string }
@@ -21,7 +23,8 @@ type DownloadAction =
     | { type: 'fetched-document'; }
     | { type: 'failed-download'; error: AppError }
 
-export function DownloadPage() {
+function DownloadPage() {
+    const navigate = useNavigate();
     const [state, dispatch] = useReducer(reducer, null, init)
 
 
@@ -34,7 +37,7 @@ export function DownloadPage() {
 
             const decodedKey = Uint8Array.fromBase64(key, { alphabet: "base64url", lastChunkHandling: 'loose' });
             const decodedIv = Uint8Array.fromBase64(iv);
-            const envelop = await decrypt(encryptedBytes, decodedKey, decodedIv);
+            const envelop = await withMinimumDuration(decrypt(encryptedBytes, decodedKey, decodedIv), 1500);
 
             const { metadata, rawFile: data } = openEnvelope(envelop);
 
@@ -47,6 +50,7 @@ export function DownloadPage() {
             URL.revokeObjectURL(blobUrl);
 
             dispatch({ type: 'fetched-document' });
+            setTimeout(() => navigate("/"), 500);
 
         } catch (e: unknown) {
 
@@ -81,18 +85,8 @@ export function DownloadPage() {
 
     if (state.status == 'downloading') {
         return (
-            <Card>
+            <Card className={styles.card}>
                 <SigilIndicator label="Downloading..." alt="Downloading & Decrypting" />
-            </Card>
-        )
-    }
-
-    if (state.status == 'done') {
-        return (
-            <Card>
-                <div>
-                    <p>Done...</p>
-                </div>
             </Card>
         )
     }
@@ -101,6 +95,16 @@ export function DownloadPage() {
         return (
             <Card variant="danger">
                 <ErrorDisplay error={state.error} />
+            </Card>
+        )
+    }
+
+    if (state.status == 'done') {
+        return (
+            <Card>
+                <div>
+                    <span>Redirecting...</span>
+                </div>
             </Card>
         )
     }
@@ -146,3 +150,5 @@ function reducer(state: DownloadState, action: DownloadAction): DownloadState {
         }
     }
 }
+
+export default DownloadPage;

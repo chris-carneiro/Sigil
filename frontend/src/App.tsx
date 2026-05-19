@@ -2,7 +2,7 @@ import TopBar from './components/layout/TopBar';
 import Main from './components/layout/Main';
 import UploadPage from './components/upload/UploadPage';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { DownloadPage } from './components/download/DownloadPage';
+import DownloadPage from './components/download/DownloadPage';
 
 
 function App() {
