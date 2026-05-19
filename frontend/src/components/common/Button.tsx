@@ -2,7 +2,7 @@ import styles from './Button.module.css'
 
 
 type ButtonProps = Omit<React.ComponentPropsWithoutRef<'button'>, 'className'> & {
-    label: string;
+    label: React.ReactNode;
     className?: string;
 }
 
