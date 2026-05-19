@@ -1,0 +1,22 @@
+.container {
+    display: flex;
+    align-items: center;
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    transition: opacity 500ms ease;
+}
+
+.iconButton {
+    background: transparent;
+    padding: 0.5rem;
+}
+
+.iconButton:hover {
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.iconButton:active {
+    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    box-shadow: none;
+}

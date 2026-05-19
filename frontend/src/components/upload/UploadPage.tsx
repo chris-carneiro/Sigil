@@ -14,6 +14,7 @@ import { SelectedFileList } from './SelectedFileList';
 import { SigilIndicator } from '../common/SigilIndicator';
 import { withMinimumDuration } from '../utils/async';
 import { DocumentId } from '../common/DocumentId';
+import { ShareActions } from '../common/ShareActions';
 
 
 type UploadState =
@@ -56,7 +57,7 @@ function UploadPage() {
             const envelope = await buildEnvelope(firstFile);
             const { cipherText, rawKey, iv } = await withMinimumDuration(
                 encrypt(envelope),
-                2000
+                1500
             );
 
             const formData = new FormData();
@@ -120,6 +121,7 @@ function UploadPage() {
             <>
                 <div className={`${styles.warnUser} ${state.status !== 'done' ? styles.hidden : ''}`} >
                     <span>This link decrypts your file — only share it with the intended trusted recipient.</span>
+                    <span>This QR code & link are only shown once — make sure to save them before leaving this page</span>
                 </div>
                 <Card className={styles.visualArea}>
                     <div className={`${styles.layer} ${state.status !== 'encrypting' ? styles.hidden : ''}`}>
@@ -132,17 +134,9 @@ function UploadPage() {
                 </Card>
                 <DocumentId documentId={`${state.status === 'done' ? new URL(state.qrUrl).pathname.split('/').at(-1) : ''}`}
                     className={state.status !== 'done' ? styles.hidden : ''} />
-                <div className={`${styles.copyContainer} ${state.status !== 'done' ? styles.hidden : ''}`}>
-                    <span>Copy link to clipboard</span>
-                    <Button label={
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <rect x="1" y="5" width="10" height="10" rx="2" stroke="var(--color-accent)" strokeWidth="1.5" />
-                            <rect x="5" y="1" width="10" height="10" rx="2" fill="var(--color-surface)" stroke="var(--color-accent)" strokeWidth="1.5" />
-                        </svg>
-                    } onClick={async () => {
-                        await navigator.clipboard.writeText(state.status === 'done' ? state.qrUrl : '');
-                    }} className={styles.iconButton} />
-                </div>
+                <ShareActions
+                    url={state.status === 'done' ? state.qrUrl : ''}
+                    className={state.status !== 'done' ? styles.hidden : ''} />
 
             </>
         )
