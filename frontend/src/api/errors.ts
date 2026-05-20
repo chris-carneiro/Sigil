@@ -1,6 +1,6 @@
-import { AppError } from '../types';
+import {AppError} from '../types';
 
-export function detailedError(error: unknown): AppError {
+export function downloadError(error: unknown): AppError {
     let appError: AppError = {
         code: "unexpected-error",
         message: "An unexpected error occurred"
@@ -25,3 +25,26 @@ export function detailedError(error: unknown): AppError {
 
     return appError;
 }
+
+export function uploadError(error: unknown): AppError {
+    let appError: AppError = {
+        code: "unexpected-error",
+        message: "An unexpected error occurred"
+    };
+
+    if (error instanceof TypeError) {
+        appError = {
+            code: 'network-error',
+            message: "The server could not be reached, check your connectivity"
+        }
+
+    } else if (error instanceof Error) {
+        appError = {
+            code: 'invalid-file',
+            message: error.message ?? "Invalid file"
+        }
+    }
+
+    return appError;
+}
+

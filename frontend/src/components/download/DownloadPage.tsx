@@ -1,15 +1,15 @@
 import styles from './DownloadPage.module.css'
 import { useReducer } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "../common/Card";
-import { ErrorDisplay } from "../common/ErrorDisplay";
-import { SigilIndicator } from "../common/SigilIndicator";
-import { DocumentId } from "../common/DocumentId";
-import { Button } from "../common/Button";
+import { Card } from '../common/Card';
+import { ErrorDisplay } from '../common/ErrorDisplay';
+import { SigilIndicator } from '../common/SigilIndicator';
+import { DocumentId } from '../common/DocumentId';
+import { Button } from '../common/Button';
 import { withMinimumDuration } from '../../utils/async'
-import { detailedError } from '../../api/errors';
-import { downloadFile } from "../../usecase/downloadFile";
-import { AppError } from "../../types";
+import { downloadError } from '../../api/errors';
+import { downloadFile } from '../../usecase/downloadFile';
+import { AppError } from '../../types';
 import { ClipboardCopy } from '../common/ClipboardCopy';
 import { truncateMiddle } from '../../utils/strings';
 
@@ -37,7 +37,7 @@ function DownloadPage() {
 
 
         } catch (e: unknown) {
-            dispatch({ type: 'failed-download', error: detailedError(e) });
+            dispatch({ type: 'failed-download', error: downloadError(e) });
         }
     }
 
