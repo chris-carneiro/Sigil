@@ -12,7 +12,7 @@ import { Button } from '../common/Button';
 import styles from './UploadPage.module.css';
 import { SelectedFileList } from './SelectedFileList';
 import { SigilIndicator } from '../common/SigilIndicator';
-import { withMinimumDuration } from '../utils/async';
+import { withMinimumDuration } from '../../utils/async';
 import { DocumentId } from '../common/DocumentId';
 import { ShareActions } from '../common/ShareActions';
 

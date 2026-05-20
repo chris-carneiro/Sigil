@@ -60,7 +60,7 @@ export type FileMetadata = {
 
 export type EnvelopeContents = {
     metadata: FileMetadata
-    rawFile: Uint8Array<ArrayBuffer>
+    payload: Uint8Array<ArrayBuffer>
 }
 
 export function openEnvelope(decryptedEnvelope: ArrayBuffer): EnvelopeContents {
@@ -76,9 +76,9 @@ export function openEnvelope(decryptedEnvelope: ArrayBuffer): EnvelopeContents {
 
         const jsonBytes = envelopeBytes.subarray(HEADER_LENGTH, metadataEndIndex);
         const metadata = JSON.parse(new TextDecoder().decode(jsonBytes));
-        const data = envelopeBytes.subarray(metadataEndIndex);
+        const payload = envelopeBytes.subarray(metadataEndIndex);
 
-        return { metadata, rawFile: data };
+        return { metadata, payload };
     } catch (e: unknown) {
         const message = e instanceof Error ? e.message : "Error splitting envelope"
         throw new Error(message);

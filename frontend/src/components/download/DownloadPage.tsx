@@ -1,75 +1,45 @@
-import { useReducer } from "react";
 import styles from './DownloadPage.module.css'
-import { getDocument as fetchDocument } from "../../api/documents";
-import { decrypt } from "../../crypto/decrypt";
-import { openEnvelope } from "../../crypto/envelope";
+import { useReducer } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "../common/Card";
 import { ErrorDisplay } from "../common/ErrorDisplay";
-import { AppError } from "../../types";
 import { SigilIndicator } from "../common/SigilIndicator";
 import { DocumentId } from "../common/DocumentId";
 import { Button } from "../common/Button";
-import { withMinimumDuration } from '../utils/async'
-import { useNavigate } from "react-router-dom";
+import { withMinimumDuration } from '../../utils/async'
+import { detailedError } from '../../api/errors';
+import { downloadFile } from "../../usecase/downloadFile";
+import { AppError } from "../../types";
+import { ClipboardCopy } from '../common/ClipboardCopy';
+import { truncateMiddle } from '../../utils/strings';
 
 type DownloadState =
     | { status: 'idle'; key: string; documentId: string }
     | { status: 'downloading' }
-    | { status: 'done'; }
+    | { status: 'done'; hash: string }
     | { status: 'error'; error: AppError }
 
 type DownloadAction =
     | { type: 'clicked-download'; }
-    | { type: 'fetched-document'; }
+    | { type: 'fetched-document'; hash: string }
     | { type: 'failed-download'; error: AppError }
 
 function DownloadPage() {
     const navigate = useNavigate();
-    const [state, dispatch] = useReducer(reducer, null, init)
+    const [state, dispatch] = useReducer(reducer, null, init);
 
-
-    async function handleDownload(documentId: string, key: string) {
+    async function handleDownload(documentId: string, key: string): Promise<void> {
         dispatch({ type: 'clicked-download' });
-
         try {
-            const { encryptedBytes, base64EncodedIV: iv } = await fetchDocument(documentId);
+            const hash = await withMinimumDuration(downloadFile(documentId, key), 1500);
 
+            dispatch({ type: 'fetched-document', hash });
 
-            const decodedKey = Uint8Array.fromBase64(key, { alphabet: "base64url", lastChunkHandling: 'loose' });
-            const decodedIv = Uint8Array.fromBase64(iv);
-            const envelop = await withMinimumDuration(decrypt(encryptedBytes, decodedKey, decodedIv), 1500);
-
-            const { metadata, rawFile: data } = openEnvelope(envelop);
-
-            const blobUrl = URL.createObjectURL(new Blob([data], { type: metadata.mimeType }));
-
-            const downloadLink = document.createElement("a");
-            downloadLink.href = blobUrl;
-            downloadLink.download = metadata.fileName;
-            downloadLink.click();
-            URL.revokeObjectURL(blobUrl);
-
-            dispatch({ type: 'fetched-document' });
-            setTimeout(() => navigate("/"), 500);
 
         } catch (e: unknown) {
-
-            if (e instanceof TypeError) {
-                dispatch({ type: 'failed-download', error: { code: 'network-error', message: "The server returned invalid data, the document could not be recovered" } });
-                return;
-            }
-
-            if (e instanceof DOMException && e.name === "OperationError") {
-                dispatch({ type: 'failed-download', error: { code: 'decryption-failed', message: "The document could not be recovered using the provided cryptographic properties" } });
-                return;
-            }
-
-            const message = e instanceof Error ? e.message : 'An unhandled error occurred';
-            dispatch({ type: 'failed-download', error: { code: 'unknown-error', message: message } });
-
+            dispatch({ type: 'failed-download', error: detailedError(e) });
         }
     }
-
 
     if (state.status == 'idle') {
         return (
@@ -100,11 +70,14 @@ function DownloadPage() {
     }
 
     if (state.status == 'done') {
+        const sha256 = "SHA-256:" + truncateMiddle(state.hash)
         return (
-            <Card>
-                <div>
-                    <span>Redirecting...</span>
+            <Card className={styles.card}>
+                <div className={styles.info}>
+                    <span>Download complete!</span>
                 </div>
+                <ClipboardCopy label={sha256} textCopy={state.hash} className={styles.hash} />
+                <Button label="Return Home" onClick={() => navigate('/')} />
             </Card>
         )
     }
@@ -130,6 +103,7 @@ function init(): DownloadState {
         error: { code: 'invalid-link', message: 'This link is invalid or has expired' }
     }
 }
+
 function reducer(state: DownloadState, action: DownloadAction): DownloadState {
     switch (action.type) {
         case 'clicked-download': {
@@ -140,6 +114,7 @@ function reducer(state: DownloadState, action: DownloadAction): DownloadState {
         case 'fetched-document': {
             return {
                 status: 'done',
+                hash: action.hash
             }
         }
         case 'failed-download': {
