@@ -26,6 +26,7 @@ export function downloadError(error: unknown): AppError {
     return appError;
 }
 
+// TODO create dedicated custom Error types
 export function uploadError(error: unknown): AppError {
     let appError: AppError = {
         code: "unexpected-error",
@@ -40,8 +41,8 @@ export function uploadError(error: unknown): AppError {
 
     } else if (error instanceof Error) {
         appError = {
-            code: 'invalid-file',
-            message: error.message ?? "Invalid file"
+            code: 'upload-error',
+            message: error.message ?? "Unknown error"
         }
     }
 
