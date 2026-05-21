@@ -32,55 +32,43 @@ function DownloadPage() {
         dispatch({ type: 'clicked-download' });
         try {
             const hash = await withMinimumDuration(downloadFile(documentId, key), 1500);
-
             dispatch({ type: 'fetched-document', hash });
-
-
         } catch (e: unknown) {
             dispatch({ type: 'failed-download', error: downloadError(e) });
         }
     }
 
-    if (state.status == 'idle') {
-        return (
-            <Card className={styles.card}>
-                <div className={styles.info}>
-                    <span>You've received a document privately sent:</span>
+    return state.status === 'error' ? (
+        <Card variant="danger">
+            <ErrorDisplay error={state.error} />
+        </Card>
+    ) : (
+        <Card className={styles.visualArea}>
+            {state.status === 'idle' && (
+                <div className={styles.layer}>
+                    <div className={styles.info}>
+                        <span>You've received a document privately sent:</span>
+                    </div>
+                    <DocumentId documentId={state.documentId} />
+                    <Button label="Download & Decrypt" onClick={() => handleDownload(state.documentId, state.key)} />
                 </div>
-                <DocumentId documentId={state.documentId} />
-                <Button label="Download & Decrypt" onClick={() => handleDownload(state.documentId, state.key)} />
-            </Card>
-        )
-    }
-
-    if (state.status == 'downloading') {
-        return (
-            <Card className={styles.card}>
-                <SigilIndicator label="Downloading..." alt="Downloading & Decrypting" />
-            </Card>
-        )
-    }
-
-    if (state.status == 'error') {
-        return (
-            <Card variant="danger">
-                <ErrorDisplay error={state.error} />
-            </Card>
-        )
-    }
-
-    if (state.status == 'done') {
-        const sha256 = "SHA-256:" + truncateMiddle(state.hash)
-        return (
-            <Card className={styles.card}>
-                <div className={styles.info}>
-                    <span>Download complete!</span>
+            )}
+            {state.status === 'downloading' && (
+                <div className={styles.layer}>
+                    <SigilIndicator label="Downloading..." alt="Downloading & Decrypting" />
                 </div>
-                <ClipboardCopy label={sha256} textCopy={state.hash} className={styles.hash} />
-                <Button label="Return Home" onClick={() => navigate('/')} />
-            </Card>
-        )
-    }
+            )}
+            {state.status === 'done' && (
+                <div className={styles.layer}>
+                    <div className={styles.info}>
+                        <span>Download complete!</span>
+                    </div>
+                    <ClipboardCopy label={"SHA-256:" + truncateMiddle(state.hash)} textCopy={state.hash} className={styles.hash} />
+                    <Button label="Return Home" onClick={() => navigate('/')} />
+                </div>
+            )}
+        </Card>
+    )
 }
 
 function init(): DownloadState {
