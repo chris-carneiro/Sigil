@@ -2,6 +2,22 @@
     width: fit-content;
 }
 
+.visualArea {
+    min-height: 455px;
+    min-width: 420px;
+    position: relative;
+}
+
+.layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
 .info {
     font-weight: bold;
     letter-spacing: -1px;
