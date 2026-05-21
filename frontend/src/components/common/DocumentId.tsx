@@ -2,7 +2,7 @@ import styles from './DocumentId.module.css'
 
 type DocumentIdProps = {
     className?: string
-    documentId: string
+    documentId?: string
 }
 
 export function DocumentId(props: DocumentIdProps) {
