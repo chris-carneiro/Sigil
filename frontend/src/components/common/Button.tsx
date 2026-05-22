@@ -1,18 +1,14 @@
-import styles from './Button.module.css'
-
+import styles from './Button.module.css';
 
 type ButtonProps = Omit<React.ComponentPropsWithoutRef<'button'>, 'className'> & {
     label: React.ReactNode;
     className?: string;
-}
+};
 
 export function Button({ label, className, ...rest }: ButtonProps) {
     return (
-        <button {...rest} className={
-            `${styles.button} ${className ?? ''}`
-        }
-            type="button">
+        <button {...rest} className={`${styles.button} ${className ?? ''}`} type='button'>
             {label}
         </button>
-    )
+    );
 }

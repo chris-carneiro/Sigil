@@ -1,17 +1,19 @@
 const HEADER_LENGTH = 4;
 
-
 export async function buildEnvelope(file: File): Promise<Uint8Array<ArrayBuffer>> {
     if (!isAscii(file)) {
-        throw new Error("The file name format is not supported, use only alphanumeric characters");
+        throw new Error('The file name format is not supported, use only alphanumeric characters');
     }
 
     const fileNameLimit = 255;
     if (file.name.length > fileNameLimit) {
-        throw new Error("The file name is too long > " + fileNameLimit);
+        throw new Error('The file name is too long > ' + fileNameLimit);
     }
 
-    const meta: FileMetadata = { fileName: file.name, mimeType: file.type || "application/octet-stream" };
+    const meta: FileMetadata = {
+        fileName: file.name,
+        mimeType: file.type || 'application/octet-stream',
+    };
     const metadata = JSON.stringify(meta);
 
     const jsonMetadata = buildJsonMetadata(metadata);
@@ -54,25 +56,29 @@ function buildHeader(metadataLength: number) {
 }
 
 export type FileMetadata = {
-    fileName: string
-    mimeType: string
-}
+    fileName: string;
+    mimeType: string;
+};
 
 export type EnvelopeContents = {
-    metadata: FileMetadata
-    payload: Uint8Array<ArrayBuffer>
-}
+    metadata: FileMetadata;
+    payload: Uint8Array<ArrayBuffer>;
+};
 
 export function openEnvelope(decryptedEnvelope: ArrayBuffer): EnvelopeContents {
     try {
-
         const envelopeBytes = new Uint8Array(decryptedEnvelope);
         const metadataLength = envelopeBytes.subarray(0, HEADER_LENGTH);
 
         // extracts metadata array length as integer value.
-        const metadataSize = new DataView(metadataLength.buffer, metadataLength.byteOffset, metadataLength.byteLength).getUint32(0);
+        const metadataSize = new DataView(
+            metadataLength.buffer,
+            metadataLength.byteOffset,
+            metadataLength.byteLength,
+        ).getUint32(0);
         const metadataEndIndex = HEADER_LENGTH + metadataSize;
-        if (metadataEndIndex > envelopeBytes.length) throw new Error("Envelope format violation detected");
+        if (metadataEndIndex > envelopeBytes.length)
+            throw new Error('Envelope format violation detected');
 
         const jsonBytes = envelopeBytes.subarray(HEADER_LENGTH, metadataEndIndex);
         const metadata = JSON.parse(new TextDecoder().decode(jsonBytes));
@@ -80,7 +86,7 @@ export function openEnvelope(decryptedEnvelope: ArrayBuffer): EnvelopeContents {
 
         return { metadata, payload };
     } catch (e: unknown) {
-        const message = e instanceof Error ? e.message : "Error splitting envelope"
+        const message = e instanceof Error ? e.message : 'Error splitting envelope';
         throw new Error(message);
     }
 }

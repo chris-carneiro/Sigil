@@ -1,16 +1,15 @@
 :root {
-    --color-bg: #F5F8F8;
-    --color-surface: #FFFFFF;
-    --color-border: #DDE5E5;
-    --color-text: #1A2E2E;
-    --color-text-muted: #5A7070;
-    --color-accent: #37ACA8;
-    --color-accent-hover: #2B8E8A;
-    --color-danger: #E05252;
+    --color-bg: #f5f8f8;
+    --color-surface: #ffffff;
+    --color-border: #dde5e5;
+    --color-text: #1a2e2e;
+    --color-text-muted: #5a7070;
+    --color-accent: #37aca8;
+    --color-accent-hover: #2b8e8a;
+    --color-danger: #e05252;
 
     --font-sans: 'Syne', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-
 
     /* tracking = letter-spacing in Tailwind */
     --tracking-wide: 2px;

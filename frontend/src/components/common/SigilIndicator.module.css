@@ -6,7 +6,6 @@
     position: relative;
 }
 
-
 .logo {
     height: 68px;
     width: 68px;
@@ -15,11 +14,10 @@
 
 .p {
     position: absolute;
-    top: calc(100% + 0.5rem)
+    top: calc(100% + 0.5rem);
 }
 
 @keyframes pulse {
-
     0%,
     100% {
         transform: scale(1);

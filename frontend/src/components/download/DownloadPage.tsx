@@ -1,12 +1,12 @@
-import styles from './DownloadPage.module.css'
-import { useReducer } from "react";
-import { useNavigate } from "react-router-dom";
+import styles from './DownloadPage.module.css';
+import { useReducer } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '../common/Card';
 import { ErrorDisplay } from '../common/ErrorDisplay';
 import { SigilIndicator } from '../common/SigilIndicator';
 import { DocumentId } from '../common/DocumentId';
 import { Button } from '../common/Button';
-import { withMinimumDuration } from '../../utils/async'
+import { withMinimumDuration } from '../../utils/async';
 import { downloadError } from '../../api/errors';
 import { downloadFile } from '../../usecase/downloadFile';
 import { AppError } from '../../types';
@@ -17,12 +17,12 @@ type DownloadState =
     | { status: 'idle'; key: string; documentId: string }
     | { status: 'downloading' }
     | { status: 'done'; hash: string }
-    | { status: 'error'; error: AppError }
+    | { status: 'error'; error: AppError };
 
 type DownloadAction =
-    | { type: 'clicked-download'; }
+    | { type: 'clicked-download' }
     | { type: 'fetched-document'; hash: string }
-    | { type: 'failed-download'; error: AppError }
+    | { type: 'failed-download'; error: AppError };
 
 function DownloadPage() {
     const navigate = useNavigate();
@@ -39,7 +39,7 @@ function DownloadPage() {
     }
 
     return state.status === 'error' ? (
-        <Card variant="danger">
+        <Card variant='danger'>
             <ErrorDisplay error={state.error} />
         </Card>
     ) : (
@@ -50,12 +50,15 @@ function DownloadPage() {
                         <span>You've received a document privately sent:</span>
                     </div>
                     <DocumentId documentId={state.documentId} />
-                    <Button label="Download & Decrypt" onClick={() => handleDownload(state.documentId, state.key)} />
+                    <Button
+                        label='Download & Decrypt'
+                        onClick={() => handleDownload(state.documentId, state.key)}
+                    />
                 </div>
             )}
             {state.status === 'downloading' && (
                 <div className={styles.layer}>
-                    <SigilIndicator label="Downloading..." alt="Downloading & Decrypting" />
+                    <SigilIndicator label='Downloading...' alt='Downloading & Decrypting' />
                 </div>
             )}
             {state.status === 'done' && (
@@ -63,20 +66,24 @@ function DownloadPage() {
                     <div className={styles.info}>
                         <span>Download complete!</span>
                     </div>
-                    <ClipboardCopy label={"SHA-256:" + truncateMiddle(state.hash)} textCopy={state.hash} className={styles.hash} />
-                    <Button label="Return Home" onClick={() => navigate('/')} />
+                    <ClipboardCopy
+                        label={'SHA-256:' + truncateMiddle(state.hash)}
+                        textCopy={state.hash}
+                        className={styles.hash}
+                    />
+                    <Button label='Return Home' onClick={() => navigate('/')} />
                 </div>
             )}
         </Card>
-    )
+    );
 }
 
 function init(): DownloadState {
     const path = window.location.pathname;
     const fragment = window.location.hash;
 
-    if (path.includes("/documents/download") && fragment) {
-        const pathEnd = path.lastIndexOf("/");
+    if (path.includes('/documents/download') && fragment) {
+        const pathEnd = path.lastIndexOf('/');
         const documentId = path.substring(pathEnd + 1);
         const key = fragment.substring(fragment.lastIndexOf('#') + 1);
         return {
@@ -88,28 +95,28 @@ function init(): DownloadState {
 
     return {
         status: 'error',
-        error: { code: 'invalid-link', message: 'This link is invalid or has expired' }
-    }
+        error: { code: 'invalid-link', message: 'This link is invalid or has expired' },
+    };
 }
 
 function reducer(state: DownloadState, action: DownloadAction): DownloadState {
     switch (action.type) {
         case 'clicked-download': {
             return {
-                status: 'downloading'
-            }
+                status: 'downloading',
+            };
         }
         case 'fetched-document': {
             return {
                 status: 'done',
-                hash: action.hash
-            }
+                hash: action.hash,
+            };
         }
         case 'failed-download': {
             return {
                 status: 'error',
-                error: action.error
-            }
+                error: action.error,
+            };
         }
     }
 }

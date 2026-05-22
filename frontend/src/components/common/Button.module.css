@@ -7,7 +7,6 @@
     color: white;
 }
 
-
 .button:active {
     box-shadow: 2px 2px 5px var(--color-accent-hover);
 }

@@ -15,37 +15,36 @@ import { ShareActions } from '../common/ShareActions';
 import { uploadFile } from '../../usecase/uploadFile';
 import { uploadError } from '../../api/errors';
 
-
 type UploadState =
     | { status: 'idle'; stagedFiles?: File[] }
     | { status: 'encrypting' }
     | { status: 'done'; qrUrl: string }
-    | { status: 'error'; error: AppError }
+    | { status: 'error'; error: AppError };
 
 type UploadAction =
-    | { type: "selected-file"; files: File[] }
-    | { type: "encrypted-file"; }
-    | { type: "succeeded-upload"; qrUrl: string }
-    | { type: "deleted-file"; file: File }
-    | { type: "failed-upload"; error: AppError }
+    | { type: 'selected-file'; files: File[] }
+    | { type: 'encrypted-file' }
+    | { type: 'succeeded-upload'; qrUrl: string }
+    | { type: 'deleted-file'; file: File }
+    | { type: 'failed-upload'; error: AppError };
 
 const initialState: UploadState = { status: 'idle' };
 
-
 function UploadPage() {
-
     const [state, dispatch] = useReducer(reducer, initialState);
 
     async function handleUpload(files: File[]) {
         dispatch({ type: 'encrypted-file' });
         try {
-            const qrUrl = await withMinimumDuration(uploadFile({
-                files: files,
-                urlOrigin: window.location.origin
-            }), 1500);
+            const qrUrl = await withMinimumDuration(
+                uploadFile({
+                    files: files,
+                    urlOrigin: window.location.origin,
+                }),
+                1500,
+            );
 
             dispatch({ type: 'succeeded-upload', qrUrl });
-
         } catch (e: unknown) {
             dispatch({ type: 'failed-upload', error: uploadError(e) });
         }
@@ -62,37 +61,44 @@ function UploadPage() {
             <div className={styles.uploadBox}>
                 <Card className={styles.uploadCard}>
                     <FileDropzone onFilesDropped={handleFilesSelected}>
-                        <SelectFile key={stagedFiles.length} onFilesSelected={handleFilesSelected} />
+                        <SelectFile
+                            key={stagedFiles.length}
+                            onFilesSelected={handleFilesSelected}
+                        />
                     </FileDropzone>
-                    <SelectedFileList files={stagedFiles} onDelete={(file) => {
-                        dispatch({ type: 'deleted-file', file: file })
-                    }} />
+                    <SelectedFileList
+                        files={stagedFiles}
+                        onDelete={(file) => {
+                            dispatch({ type: 'deleted-file', file: file });
+                        }}
+                    />
                 </Card>
-                <div className={`${styles.buttonContainer} ${(state.stagedFiles?.length ?? 0) > 0 ? '' : styles.hidden}`}>
-                    <Button onClick={() => handleUpload(state.stagedFiles ?? [])}
+                <div
+                    className={`${styles.buttonContainer} ${(state.stagedFiles?.length ?? 0) > 0 ? '' : styles.hidden}`}
+                >
+                    <Button
+                        onClick={() => handleUpload(state.stagedFiles ?? [])}
                         className={styles.uploadButton}
-                        label='Upload' />
+                        label='Upload'
+                    />
                 </div>
             </div>
-        )
+        );
     }
 
     if (state.status == 'error') {
         return (
-            <Card variant="danger">
+            <Card variant='danger'>
                 <ErrorDisplay error={state.error} />
             </Card>
-        )
+        );
     }
 
     if (state.status === 'encrypting') {
         return (
             <Card className={styles.visualArea}>
                 <div className={styles.layer}>
-                    <SigilIndicator
-                        label='Encrypting...'
-                        alt='Encrypting before uploading.'
-                    />
+                    <SigilIndicator label='Encrypting...' alt='Encrypting before uploading.' />
                 </div>
             </Card>
         );
@@ -105,13 +111,13 @@ function UploadPage() {
             <>
                 <div className={styles.warnUser}>
                     <span>
-                        This link decrypts your file — only share it
-                        with the intended trusted recipient.
+                        This link decrypts your file — only share it with the intended trusted
+                        recipient.
                     </span>
 
                     <span>
-                        This QR code & link are only shown once —
-                        make sure to save them before leaving this page
+                        This QR code & link are only shown once — make sure to save them before
+                        leaving this page
                     </span>
                 </div>
 
@@ -134,41 +140,38 @@ function reducer(state: UploadState, action: UploadAction): UploadState {
         case 'selected-file': {
             return {
                 status: 'idle',
-                stagedFiles: action.files
-            }
+                stagedFiles: action.files,
+            };
         }
 
         case 'encrypted-file': {
             return {
-                status: 'encrypting'
-            }
+                status: 'encrypting',
+            };
         }
-
 
         case 'succeeded-upload': {
             return {
                 status: 'done',
-                qrUrl: action.qrUrl
-            }
+                qrUrl: action.qrUrl,
+            };
         }
 
         case 'deleted-file': {
             if (state.status !== 'idle') return state;
             return {
                 status: 'idle',
-                stagedFiles: state.stagedFiles?.filter(file => file.name !== action.file.name)
-            }
+                stagedFiles: state.stagedFiles?.filter((file) => file.name !== action.file.name),
+            };
         }
 
         case 'failed-upload': {
             return {
                 status: 'error',
-                error: action.error
-            }
+                error: action.error,
+            };
         }
-
     }
 }
-
 
 export default UploadPage;

@@ -1,13 +1,11 @@
 import styles from './SelectFile.module.css';
-import {useRef} from "react";
+import { useRef } from 'react';
 
 type SelectFileProps = {
-    onFilesSelected: (files: File[]) => void
-}
+    onFilesSelected: (files: File[]) => void;
+};
 
-
-function SelectFile({onFilesSelected}: SelectFileProps) {
-
+function SelectFile({ onFilesSelected }: SelectFileProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     function handleSelectedFiles() {
@@ -17,20 +15,20 @@ function SelectFile({onFilesSelected}: SelectFileProps) {
             return;
         }
         const files: File[] = Array.from(input.files);
-        onFilesSelected(files)
+        onFilesSelected(files);
     }
 
     return (
         <div className={styles.container}>
-            <label className={styles.label} htmlFor="file-upload">
+            <label className={styles.label} htmlFor='file-upload'>
                 Drop files here, or click to upload.
             </label>
 
             <input
-                id="file-upload"
+                id='file-upload'
                 className={styles.fileInput}
                 ref={inputRef}
-                type="file"
+                type='file'
                 onChange={handleSelectedFiles}
             />
         </div>

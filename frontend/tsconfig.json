@@ -1,12 +1,12 @@
 {
-  "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./built",
-    "allowJs": true,
-    "target": "es2022",
-    "lib": ["DOM", "ESNext"],
-    "jsx": "preserve",
-    "moduleResolution": "bundler"
-  },
-  "include": ["./src/**/*"]
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./built",
+        "allowJs": true,
+        "target": "es2022",
+        "lib": ["DOM", "ESNext"],
+        "jsx": "preserve",
+        "moduleResolution": "bundler"
+    },
+    "include": ["./src/**/*"]
 }
