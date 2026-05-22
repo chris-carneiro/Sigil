@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Test and coverage output
+coverage/
+playwright-report/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Already formatted
+*.min.js
+*.min.css
