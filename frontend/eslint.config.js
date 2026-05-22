@@ -45,9 +45,9 @@ export default defineConfig([
             'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
 
             // Style rules
-            'quotes': ['error', 'single'],
-            'semi': ['error', 'always'],
-            'indent': ['error', 4, { SwitchCase: 1 }],
+            quotes: ['error', 'single'],
+            semi: ['error', 'always'],
+            indent: ['error', 4, { SwitchCase: 1 }],
             'comma-dangle': ['error', 'always-multiline'],
             'object-curly-spacing': ['error', 'always'],
             'array-bracket-spacing': ['error', 'never'],
@@ -58,13 +58,16 @@ export default defineConfig([
             'eol-last': ['error', 'always'],
 
             // Import rules
-            'sort-imports': ['error', {
-                ignoreCase: true,
-                ignoreDeclarationSort: true,
-                ignoreMemberSort: false,
-                memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
-                allowSeparatedGroups: true,
-            }],
+            'sort-imports': [
+                'error',
+                {
+                    ignoreCase: true,
+                    ignoreDeclarationSort: true,
+                    ignoreMemberSort: false,
+                    memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
+                    allowSeparatedGroups: true,
+                },
+            ],
         },
     },
 ]);

@@ -4,5 +4,5 @@
     align-items: center;
     transition: opacity 500ms ease;
     gap: 1rem;
-    width: fit-content
+    width: fit-content;
 }

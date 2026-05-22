@@ -8,7 +8,7 @@ export function NotFound() {
     return (
         <Card className={styles.card}>
             <p className={styles.message}>It's okay to be lost sometimes...</p>
-            <Button label="Go Home" onClick={() => navigate('/')} />
+            <Button label='Go Home' onClick={() => navigate('/')} />
         </Card>
-    )
+    );
 }

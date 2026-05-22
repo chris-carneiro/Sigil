@@ -1,15 +1,15 @@
 .fileInput {
-  max-width: 100%;
-  display: none;
+    max-width: 100%;
+    display: none;
 }
 
 .container {
-  width: 100%;
-  text-align: center;
+    width: 100%;
+    text-align: center;
 }
 
 .label {
-  padding: 10%;
-  display: inline-block;
-  cursor: pointer;
+    padding: 10%;
+    display: inline-block;
+    cursor: pointer;
 }
