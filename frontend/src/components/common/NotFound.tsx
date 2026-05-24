@@ -3,7 +3,7 @@ import { Card } from './Card';
 import { Button } from './Button';
 import styles from './NotFound.module.css';
 
-export function NotFound() {
+export function NotFound () {
     const navigate = useNavigate();
     return (
         <Card className={styles.card}>

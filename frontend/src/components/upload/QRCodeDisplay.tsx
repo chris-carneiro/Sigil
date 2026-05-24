@@ -6,7 +6,7 @@ type QRCodeDisplayProps = {
     url: string;
 };
 
-export function QRCodeDisplay(props: QRCodeDisplayProps) {
+export function QRCodeDisplay (props: QRCodeDisplayProps) {
     if (!props.url) return null;
 
     const accent = getComputedStyle(document.documentElement)

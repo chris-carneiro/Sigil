@@ -4,7 +4,7 @@ type ErrorDisplayProps = {
     error: AppError;
 };
 
-export function ErrorDisplay(props: ErrorDisplayProps) {
+export function ErrorDisplay (props: ErrorDisplayProps) {
     return (
         <output className={styles.container} role='alert'>
             <span className={styles.code}>{props.error.code}</span>

@@ -5,7 +5,7 @@ import { decrypt } from '../crypto/decrypt';
 import { triggerBrowserDownload } from '../utils/browser';
 import { sha256 } from '../crypto/digest';
 
-export async function downloadFile(documentId: string, key: string): Promise<string> {
+export async function downloadFile (documentId: string, key: string): Promise<string> {
     const { encryptedBytes, base64EncodedIV: iv } = await fetchDocument(documentId);
 
     const decodedKey = Uint8Array.fromBase64(key, {

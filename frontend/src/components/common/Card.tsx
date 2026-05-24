@@ -6,7 +6,7 @@ type CardProps = {
     className?: string;
 };
 
-export function Card(props: CardProps) {
+export function Card (props: CardProps) {
     return (
         <div
             className={`${styles.card} ${props.variant === 'danger' ? styles.danger : ''} ${props.className} ?? ''`}

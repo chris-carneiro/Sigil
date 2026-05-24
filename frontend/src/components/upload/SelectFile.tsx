@@ -5,10 +5,10 @@ type SelectFileProps = {
     onFilesSelected: (files: File[]) => void;
 };
 
-function SelectFile({ onFilesSelected }: SelectFileProps) {
+function SelectFile ({ onFilesSelected }: SelectFileProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
-    function handleSelectedFiles() {
+    function handleSelectedFiles () {
         const input = inputRef.current;
 
         if (!input || !input.files) {
