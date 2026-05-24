@@ -4,7 +4,7 @@ type Content = {
     children: React.ReactNode;
 };
 
-function Main({ children }: Content) {
+function Main ({ children }: Content) {
     return <main className={styles.main}>{children}</main>;
 }
 

@@ -6,10 +6,10 @@ type FileDropzoneProps = {
     children: React.ReactNode;
 };
 
-export function FileDropzone(props: FileDropzoneProps) {
+export function FileDropzone (props: FileDropzoneProps) {
     const [isDragOver, setIsDragOver] = useState(false);
 
-    function handleDrop(event: DragEvent<HTMLDivElement>) {
+    function handleDrop (event: DragEvent<HTMLDivElement>) {
         event.preventDefault();
         setIsDragOver(false);
         const files: File[] = Array.from(event.dataTransfer.files);

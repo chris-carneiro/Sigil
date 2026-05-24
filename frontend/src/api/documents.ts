@@ -7,7 +7,7 @@ export type FetchResponse = {
     base64EncodedIV: string;
 };
 
-export async function postDocument(formData: FormData): Promise<UploadResponse> {
+export async function postDocument (formData: FormData): Promise<UploadResponse> {
     const response = await fetch('/api/v1/documents', {
         method: 'POST',
         body: formData,
@@ -27,7 +27,7 @@ export async function postDocument(formData: FormData): Promise<UploadResponse> 
     return { documentId };
 }
 
-export async function getDocument(documentId: string): Promise<FetchResponse> {
+export async function getDocument (documentId: string): Promise<FetchResponse> {
     const response = await fetch('/api/v1/documents/' + documentId, {
         method: 'GET',
     });

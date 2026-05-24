@@ -4,7 +4,7 @@ type EncryptedResult = {
     rawIV: Uint8Array<ArrayBuffer>;
 };
 
-export async function encrypt(envelope: BufferSource): Promise<EncryptedResult> {
+export async function encrypt (envelope: BufferSource): Promise<EncryptedResult> {
     const cryptoKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, [
         'encrypt',
         'decrypt',

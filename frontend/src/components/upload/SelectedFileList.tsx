@@ -6,12 +6,12 @@ type SelectedFileListProps = {
     onDelete: (file: File) => void;
 };
 
-export function SelectedFileList(props: SelectedFileListProps) {
+export function SelectedFileList (props: SelectedFileListProps) {
     const files = props.files;
     const singleFile = files ? files[0] : undefined; // Only single file upload is supported in MVP.
     if (!singleFile) return;
 
-    function handleDelete(file: File) {
+    function handleDelete (file: File) {
         return () => props.onDelete(file);
     }
 

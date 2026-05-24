@@ -1,7 +1,7 @@
 import sigilMark from '../../assets/sigil_mark_light.svg';
 import styles from './TopBar.module.css';
 
-function TopBar() {
+function TopBar () {
     return (
         <header className={styles.topBar}>
             <img

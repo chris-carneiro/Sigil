@@ -24,11 +24,11 @@ type DownloadAction =
     | { type: 'fetched-document'; hash: string }
     | { type: 'failed-download'; error: AppError };
 
-function DownloadPage() {
+function DownloadPage () {
     const navigate = useNavigate();
     const [state, dispatch] = useReducer(reducer, null, init);
 
-    async function handleDownload(documentId: string, key: string): Promise<void> {
+    async function handleDownload (documentId: string, key: string): Promise<void> {
         dispatch({ type: 'clicked-download' });
         try {
             const hash = await withMinimumDuration(downloadFile(documentId, key), 1500);
@@ -78,7 +78,7 @@ function DownloadPage() {
     );
 }
 
-function init(): DownloadState {
+function init (): DownloadState {
     const path = window.location.pathname;
     const fragment = window.location.hash;
 
@@ -99,7 +99,7 @@ function init(): DownloadState {
     };
 }
 
-function reducer(state: DownloadState, action: DownloadAction): DownloadState {
+function reducer (state: DownloadState, action: DownloadAction): DownloadState {
     switch (action.type) {
         case 'clicked-download': {
             return {

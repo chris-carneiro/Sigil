@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Button } from './Button';
 import styles from './ShareActions.module.css';
 import { ClipboardCopy } from './ClipboardCopy';
@@ -8,7 +7,7 @@ type ShareActionsProps = {
     className?: string;
 };
 
-export function ShareActions({ url, className }: ShareActionsProps) {
+export function ShareActions ({ url, className }: ShareActionsProps) {
     const handleShare = async () => {
         await navigator.share({ url, title: 'Secure document' });
     };
