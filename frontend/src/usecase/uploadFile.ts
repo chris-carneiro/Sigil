@@ -10,7 +10,7 @@ interface UploadParams {
     urlOrigin: string;
 }
 
-export async function uploadFile(params: UploadParams) {
+export async function uploadFile (params: UploadParams) {
     const firstFile = params.files?.[0];
 
     if (!firstFile?.name) {
@@ -32,12 +32,12 @@ export async function uploadFile(params: UploadParams) {
 
     const { documentId } = await uploadDocument(formData);
 
-    const encodedKey = new Uint8Array(rawKey).toBase64({
+    const keyBytes = new Uint8Array(rawKey);
+    const encodedKey = keyBytes.toBase64({
         alphabet: 'base64url',
         omitPadding: true,
     });
-
-    new Uint8Array(rawKey).fill(0);
+    keyBytes.fill(0);
 
     return `${params.urlOrigin}/documents/download/${documentId}#${encodedKey}`;
 }
