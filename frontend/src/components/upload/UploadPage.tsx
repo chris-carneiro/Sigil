@@ -171,6 +171,8 @@ function reducer (state: UploadState, action: UploadAction): UploadState {
                 error: action.error,
             };
         }
+        default:
+            return state;
     }
 }
 

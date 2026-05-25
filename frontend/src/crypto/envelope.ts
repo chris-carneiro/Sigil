@@ -1,14 +1,38 @@
+import { FILENAME_LIMIT, RESERVED_FILENAMES } from '../constants';
+
 const HEADER_LENGTH = 4;
 
+function isValidFilename (file: File): boolean {
+    const name = file.name;
 
-export async function buildEnvelope (file: File): Promise<Uint8Array<ArrayBuffer>> {
-    if (!isAscii(file)) {
-        throw new Error('The file name format is not supported, use only alphanumeric characters');
+    // Check for null bytes
+    if (name.includes('\0')) {
+        return false;
     }
 
-    const fileNameLimit = 255;
-    if (file.name.length > fileNameLimit) {
-        throw new Error('The file name is too long > ' + fileNameLimit);
+    // Check for path traversal
+    if (name.includes('../') || name.includes('..\\')) {
+        return false;
+    }
+
+    // Check for reserved Windows filenames
+    const baseName = name.split('/').pop()?.split('\\').pop() || name;
+    if (RESERVED_FILENAMES.has(baseName.toUpperCase())) {
+        return false;
+    }
+
+    // Check length
+    if (name.length > FILENAME_LIMIT) {
+        return false;
+    }
+
+    // Check ASCII (original check)
+    return new TextEncoder().encode(name).length === name.length;
+}
+
+export async function buildEnvelope (file: File): Promise<Uint8Array<ArrayBuffer>> {
+    if (!isValidFilename(file)) {
+        throw new Error('Invalid file name: contains forbidden characters, path traversal, or is too long');
     }
 
     const meta: FileMetadata = { fileName: file.name, mimeType: file.type || 'application/octet-stream' };
@@ -27,10 +51,6 @@ export async function buildEnvelope (file: File): Promise<Uint8Array<ArrayBuffer
     envelope.set(fileBytes, HEADER_LENGTH + jsonMetadata.length);
 
     return envelope;
-}
-
-function isAscii (file: File) {
-    return new TextEncoder().encode(file.name).length == file.name.length;
 }
 
 async function buildFileBytes (file: File) {

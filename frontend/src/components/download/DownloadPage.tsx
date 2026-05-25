@@ -118,6 +118,8 @@ function reducer (state: DownloadState, action: DownloadAction): DownloadState {
                 error: action.error,
             };
         }
+        default:
+            return state;
     }
 }
 
