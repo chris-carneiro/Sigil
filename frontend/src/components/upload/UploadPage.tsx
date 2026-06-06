@@ -30,10 +30,10 @@ type UploadAction =
 
 const initialState: UploadState = { status: 'idle' };
 
-function UploadPage () {
+function UploadPage() {
     const [state, dispatch] = useReducer(reducer, initialState);
 
-    async function handleUpload (files: File[]) {
+    async function handleUpload(files: File[]) {
         dispatch({ type: 'encrypted-file' });
         try {
             const qrUrl = await withMinimumDuration(
@@ -50,7 +50,7 @@ function UploadPage () {
         }
     }
 
-    function handleFilesSelected (files: File[]) {
+    function handleFilesSelected(files: File[]) {
         if (!files || files.length == 0) return;
         dispatch({ type: 'selected-file', files: files });
     }
@@ -135,7 +135,7 @@ function UploadPage () {
     }
 }
 
-function reducer (state: UploadState, action: UploadAction): UploadState {
+function reducer(state: UploadState, action: UploadAction): UploadState {
     switch (action.type) {
         case 'selected-file': {
             return {

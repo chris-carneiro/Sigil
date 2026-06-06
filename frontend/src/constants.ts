@@ -4,9 +4,17 @@ export const FILENAME_LIMIT = 255;
 
 // File type restrictions
 export const BLOCKED_EXTENSIONS = new Set([
-    '.exe', '.dll', '.so', // Executables
-    '.js', '.py', '.sh', '.ps1', '.bat', '.cmd', // Scripts
-    '.msi', '.app', // Installers
+    '.exe',
+    '.dll',
+    '.so', // Executables
+    '.js',
+    '.py',
+    '.sh',
+    '.ps1',
+    '.bat',
+    '.cmd', // Scripts
+    '.msi',
+    '.app', // Installers
 ]);
 
 export const ALLOWED_MIME_TYPES = new Set([
@@ -41,7 +49,26 @@ export const ALLOWED_MIME_TYPES = new Set([
 
 // Reserved Windows filenames
 export const RESERVED_FILENAMES = new Set([
-    'CON', 'PRN', 'AUX', 'NUL',
-    'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-    'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9',
+    'CON',
+    'PRN',
+    'AUX',
+    'NUL',
+    'COM1',
+    'COM2',
+    'COM3',
+    'COM4',
+    'COM5',
+    'COM6',
+    'COM7',
+    'COM8',
+    'COM9',
+    'LPT1',
+    'LPT2',
+    'LPT3',
+    'LPT4',
+    'LPT5',
+    'LPT6',
+    'LPT7',
+    'LPT8',
+    'LPT9',
 ]);

@@ -1,6 +1,6 @@
 import { AppError } from '../types';
 
-export function downloadError (error: unknown): AppError {
+export function downloadError(error: unknown): AppError {
     let appError: AppError = {
         code: 'unexpected-error',
         message: 'An unexpected error occurred',
@@ -29,7 +29,7 @@ export function downloadError (error: unknown): AppError {
 }
 
 // TODO create dedicated custom Error types
-export function uploadError (error: unknown): AppError {
+export function uploadError(error: unknown): AppError {
     let appError: AppError = {
         code: 'unexpected-error',
         message: 'An unexpected error occurred',
