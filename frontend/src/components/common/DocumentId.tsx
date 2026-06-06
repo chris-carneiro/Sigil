@@ -1,3 +1,4 @@
+import type { JSX } from 'react';
 import styles from './DocumentId.module.css';
 
 type DocumentIdProps = {
@@ -5,10 +6,10 @@ type DocumentIdProps = {
     documentId?: string;
 };
 
-export function DocumentId(props: DocumentIdProps) {
+export function DocumentId({ className, documentId }: DocumentIdProps): JSX.Element {
     return (
-        <div className={`${styles.documentId} ${props.className ?? ''}`}>
-            <span>{props.documentId}</span>
+        <div className={`${styles.documentId} ${className ?? ''}`}>
+            <span>{documentId ?? 'N/A'}</span>
         </div>
     );
 }
