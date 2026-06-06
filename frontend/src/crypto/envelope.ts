@@ -2,7 +2,7 @@ import { FILENAME_LIMIT, RESERVED_FILENAMES } from '../constants';
 
 const HEADER_LENGTH = 4;
 
-function isValidFilename (file: File): boolean {
+function isValidFilename(file: File): boolean {
     const name = file.name;
 
     // Check for null bytes
@@ -30,12 +30,17 @@ function isValidFilename (file: File): boolean {
     return new TextEncoder().encode(name).length === name.length;
 }
 
-export async function buildEnvelope (file: File): Promise<Uint8Array<ArrayBuffer>> {
+export async function buildEnvelope(file: File): Promise<Uint8Array<ArrayBuffer>> {
     if (!isValidFilename(file)) {
-        throw new Error('Invalid file name: contains forbidden characters, path traversal, or is too long');
+        throw new Error(
+            'Invalid file name: contains forbidden characters, path traversal, or is too long',
+        );
     }
 
-    const meta: FileMetadata = { fileName: file.name, mimeType: file.type || 'application/octet-stream' };
+    const meta: FileMetadata = {
+        fileName: file.name,
+        mimeType: file.type || 'application/octet-stream',
+    };
     const metadata = JSON.stringify(meta);
 
     const jsonMetadata = buildJsonMetadata(metadata);
@@ -53,19 +58,19 @@ export async function buildEnvelope (file: File): Promise<Uint8Array<ArrayBuffer
     return envelope;
 }
 
-async function buildFileBytes (file: File) {
+async function buildFileBytes(file: File) {
     const fileBuffer = await file.arrayBuffer();
     const fileBytes = new Uint8Array(fileBuffer);
     return fileBytes;
 }
 
-function buildJsonMetadata (metadata: string): Uint8Array {
+function buildJsonMetadata(metadata: string): Uint8Array {
     const textEncoder = new TextEncoder();
     const jsonMetadata = textEncoder.encode(metadata);
     return jsonMetadata;
 }
 
-function buildHeader (metadataLength: number) {
+function buildHeader(metadataLength: number) {
     const headerBuffer = new ArrayBuffer(HEADER_LENGTH);
     const view = new DataView(headerBuffer);
     view.setUint32(0, metadataLength);
@@ -74,25 +79,29 @@ function buildHeader (metadataLength: number) {
 }
 
 export type FileMetadata = {
-    fileName: string
-    mimeType: string
-}
+    fileName: string;
+    mimeType: string;
+};
 
 export type EnvelopeContents = {
-    metadata: FileMetadata
-    payload: Uint8Array<ArrayBuffer>
-}
+    metadata: FileMetadata;
+    payload: Uint8Array<ArrayBuffer>;
+};
 
-export function openEnvelope (decryptedEnvelope: ArrayBuffer): EnvelopeContents {
+export function openEnvelope(decryptedEnvelope: ArrayBuffer): EnvelopeContents {
     try {
-
         const envelopeBytes = new Uint8Array(decryptedEnvelope);
         const metadataLength = envelopeBytes.subarray(0, HEADER_LENGTH);
 
         // extracts metadata array length as integer value.
-        const metadataSize = new DataView(metadataLength.buffer, metadataLength.byteOffset, metadataLength.byteLength).getUint32(0);
+        const metadataSize = new DataView(
+            metadataLength.buffer,
+            metadataLength.byteOffset,
+            metadataLength.byteLength,
+        ).getUint32(0);
         const metadataEndIndex = HEADER_LENGTH + metadataSize;
-        if (metadataEndIndex > envelopeBytes.length) throw new Error('Envelope format violation detected');
+        if (metadataEndIndex > envelopeBytes.length)
+            throw new Error('Envelope format violation detected');
 
         const jsonBytes = envelopeBytes.subarray(HEADER_LENGTH, metadataEndIndex);
         const metadata = JSON.parse(new TextDecoder().decode(jsonBytes));

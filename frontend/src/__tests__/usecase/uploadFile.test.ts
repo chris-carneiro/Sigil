@@ -27,15 +27,17 @@ describe('uploadFile', () => {
     });
 
     it('should reject empty files array', async () => {
-        await expect(uploadFile({ files: [], urlOrigin: mockUrlOrigin }))
-            .rejects.toThrow('Invalid file');
+        await expect(uploadFile({ files: [], urlOrigin: mockUrlOrigin })).rejects.toThrow(
+            'Invalid file',
+        );
     });
 
     it('should reject when first file has no name', async () => {
         const file = new File([''], '');
         Object.defineProperty(file, 'name', { value: '' });
-        await expect(uploadFile({ files: [file], urlOrigin: mockUrlOrigin }))
-            .rejects.toThrow('Invalid file');
+        await expect(uploadFile({ files: [file], urlOrigin: mockUrlOrigin })).rejects.toThrow(
+            'Invalid file',
+        );
     });
 
     it('should reject file exceeding size limit', async () => {
@@ -43,39 +45,38 @@ describe('uploadFile', () => {
         const largeContent = new Uint8Array(FILE_SIZE_LIMIT + 1);
         const file = new File([largeContent], 'large.txt', { type: 'text/plain' });
 
-        await expect(uploadFile({ files: [file], urlOrigin: mockUrlOrigin }))
-            .rejects.toThrow(`File is too large. Maximum size is ${FILE_SIZE_LIMIT / 1_000_000}MB`);
+        await expect(uploadFile({ files: [file], urlOrigin: mockUrlOrigin })).rejects.toThrow(
+            `File is too large. Maximum size is ${FILE_SIZE_LIMIT / 1_000_000}MB`,
+        );
     });
 
     it('should accept file at exactly size limit', async () => {
         const smallerContent = new Uint8Array(1000);
         const smallerFile = new File([smallerContent], 'small.txt', { type: 'text/plain' });
 
-        await expect(uploadFile({ files: [smallerFile], urlOrigin: mockUrlOrigin }))
-            .resolves.toContain('https://example.com/documents/download/test-doc-id#');
+        await expect(
+            uploadFile({ files: [smallerFile], urlOrigin: mockUrlOrigin }),
+        ).resolves.toContain('https://example.com/documents/download/test-doc-id#');
     });
 
     it('should reject blocked file extensions', async () => {
         const blockedExtensions = ['.exe', '.dll', '.so', '.js', '.py', '.sh'];
         for (const ext of blockedExtensions) {
             const file = new File(['test'], `test${ext}`, { type: 'application/octet-stream' });
-            await expect(uploadFile({ files: [file], urlOrigin: mockUrlOrigin }))
-                .rejects.toThrow('File type not allowed');
+            await expect(uploadFile({ files: [file], urlOrigin: mockUrlOrigin })).rejects.toThrow(
+                'File type not allowed',
+            );
         }
     });
 
     it('should accept allowed MIME types', async () => {
-        const allowedTypes = [
-            'text/plain',
-            'application/pdf',
-            'image/png',
-            'image/jpeg',
-        ];
+        const allowedTypes = ['text/plain', 'application/pdf', 'image/png', 'image/jpeg'];
 
         for (const mimeType of allowedTypes) {
             const file = new File(['test'], 'test.txt', { type: mimeType });
-            await expect(uploadFile({ files: [file], urlOrigin: mockUrlOrigin }))
-                .resolves.toBeDefined();
+            await expect(
+                uploadFile({ files: [file], urlOrigin: mockUrlOrigin }),
+            ).resolves.toBeDefined();
         }
     });
 

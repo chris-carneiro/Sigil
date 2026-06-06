@@ -1,11 +1,7 @@
 import { buildEnvelope } from '../crypto/envelope';
 import { encrypt } from '../crypto/encrypt';
 import { postDocument as uploadDocument } from '../api/documents';
-import {
-    ALLOWED_MIME_TYPES,
-    BLOCKED_EXTENSIONS,
-    FILE_SIZE_LIMIT,
-} from '../constants';
+import { ALLOWED_MIME_TYPES, BLOCKED_EXTENSIONS, FILE_SIZE_LIMIT } from '../constants';
 
 const applicationOctetStream = 'application/octet-stream';
 
@@ -14,11 +10,11 @@ interface UploadParams {
     urlOrigin: string;
 }
 
-function getFileExtension (filename: string): string {
+function getFileExtension(filename: string): string {
     return filename.slice(filename.lastIndexOf('.')).toLowerCase();
 }
 
-function isFileTypeAllowed (file: File): boolean {
+function isFileTypeAllowed(file: File): boolean {
     const extension = getFileExtension(file.name);
 
     // Block dangerous extensions
@@ -36,7 +32,7 @@ function isFileTypeAllowed (file: File): boolean {
     return true;
 }
 
-export async function uploadFile (params: UploadParams) {
+export async function uploadFile(params: UploadParams) {
     const firstFile = params.files?.[0];
 
     if (!firstFile?.name) {

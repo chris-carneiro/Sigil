@@ -8,7 +8,7 @@ type CopyButtonProps = {
     className?: string;
 };
 
-export function ClipboardCopy ({ label, textCopy, className, ...rest }: CopyButtonProps) {
+export function ClipboardCopy({ label, textCopy, className, ...rest }: CopyButtonProps) {
     const [copied, setCopied] = useState(false);
     const handleCopy = async () => {
         await navigator.clipboard.writeText(textCopy);

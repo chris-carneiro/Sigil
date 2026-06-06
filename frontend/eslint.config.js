@@ -7,13 +7,7 @@ import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
     {
-        ignores: [
-            'dist',
-            'node_modules',
-            'coverage',
-            'playwright-report',
-            '.vite',
-        ],
+        ignores: ['dist', 'node_modules', 'coverage', 'playwright-report', '.vite'],
     },
     {
         files: ['**/*.{js,jsx,ts,tsx}'],
@@ -39,24 +33,27 @@ export default defineConfig([
             'react-hooks/rules-of-hooks': 'error',
             'react-hooks/exhaustive-deps': 'warn',
             'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
-            'quotes': ['error', 'single'],
-            'semi': ['error', 'always'],
-            'indent': ['error', 4, { SwitchCase: 1 }],
+            quotes: ['error', 'single'],
+            semi: ['error', 'always'],
+            indent: ['error', 4, { SwitchCase: 1 }],
             'comma-dangle': ['error', 'always-multiline'],
             'object-curly-spacing': ['error', 'always'],
             'array-bracket-spacing': ['error', 'never'],
-            'space-before-function-paren': ['error', 'always'],
+            'space-before-function-paren': 'off',
             'keyword-spacing': ['error', { before: true, after: true }],
             'space-infix-ops': 'error',
             'no-trailing-spaces': 'error',
             'eol-last': ['error', 'always'],
-            'sort-imports': ['error', {
-                ignoreCase: true,
-                ignoreDeclarationSort: true,
-                ignoreMemberSort: false,
-                memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
-                allowSeparatedGroups: true,
-            }],
+            'sort-imports': [
+                'error',
+                {
+                    ignoreCase: true,
+                    ignoreDeclarationSort: true,
+                    ignoreMemberSort: false,
+                    memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
+                    allowSeparatedGroups: true,
+                },
+            ],
         },
     },
 ]);

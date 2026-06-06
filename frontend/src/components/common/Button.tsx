@@ -5,7 +5,7 @@ type ButtonProps = Omit<React.ComponentPropsWithoutRef<'button'>, 'className'> &
     className?: string;
 };
 
-export function Button ({ label, className, ...rest }: ButtonProps) {
+export function Button({ label, className, ...rest }: ButtonProps) {
     return (
         <button {...rest} className={`${styles.button} ${className ?? ''}`} type='button'>
             {label}

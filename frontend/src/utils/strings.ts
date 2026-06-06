@@ -1,4 +1,4 @@
-export function truncateMiddle (filename: string): string {
+export function truncateMiddle(filename: string): string {
     const maxLength: number = 20;
 
     if (filename.length >= maxLength) {

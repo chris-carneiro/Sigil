@@ -1,4 +1,4 @@
-export function triggerBrowserDownload (
+export function triggerBrowserDownload(
     data: Uint8Array<ArrayBuffer>,
     metadata: { mimeType: string; fileName: string },
 ) {
