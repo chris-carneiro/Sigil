@@ -9,7 +9,7 @@ import { Button } from '../common/Button';
 import { withMinimumDuration } from '../../utils/async';
 import { downloadError } from '../../api/errors';
 import { downloadFile } from '../../usecase/downloadFile';
-import { AppError } from '../../types';
+import { AppError, AppErrorCode } from '../../types';
 import { ClipboardCopy } from '../common/ClipboardCopy';
 import { truncateMiddle } from '../../utils/strings';
 
@@ -93,10 +93,11 @@ function init(): DownloadState {
         };
     }
 
-    return {
-        status: 'error',
-        error: { code: 'invalid-link', message: 'This link is invalid or has expired' },
+    const error: AppError = {
+        code: 'invalid-link' as AppErrorCode,
+        message: 'This link is invalid or has expired',
     };
+    return { status: 'error', error };
 }
 
 function reducer(state: DownloadState, action: DownloadAction): DownloadState {
