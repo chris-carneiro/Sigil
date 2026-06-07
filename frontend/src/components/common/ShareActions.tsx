@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from './Button';
 import styles from './ShareActions.module.css';
 import { ClipboardCopy } from './ClipboardCopy';
@@ -8,8 +9,21 @@ type ShareActionsProps = {
 };
 
 export function ShareActions({ url, className }: ShareActionsProps) {
+    const [error, setError] = useState<string | null>(null);
+
     const handleShare = async () => {
-        await navigator.share({ url, title: 'Secure document' });
+        setError(null);
+        try {
+            await navigator.share({ url, title: 'Secure document' });
+        } catch (err) {
+            const errorMessage =
+                err instanceof Error
+                    ? err.message
+                    : err instanceof DOMException
+                        ? 'Sharing was cancelled or failed'
+                        : 'Failed to share';
+            setError(errorMessage);
+        }
     };
 
     return (
@@ -43,8 +57,10 @@ export function ShareActions({ url, className }: ShareActionsProps) {
                     }
                     onClick={handleShare}
                     className={styles.iconButton}
+                    aria-label='Share document'
                 />
             )}
+            {error && <span className={styles.error} role='alert'>{error}</span>}
         </div>
     );
 }
