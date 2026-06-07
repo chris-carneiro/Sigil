@@ -6,8 +6,8 @@ type QRCodeDisplayProps = {
     url: string;
 };
 
-export function QRCodeDisplay(props: QRCodeDisplayProps) {
-    if (!props.url) return null;
+export function QRCodeDisplay({ url }: QRCodeDisplayProps) {
+    if (!url) return null;
 
     const accent = getComputedStyle(document.documentElement)
         .getPropertyValue('--color-accent')
@@ -15,9 +15,9 @@ export function QRCodeDisplay(props: QRCodeDisplayProps) {
     const bg = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
     return (
         <>
-            <div className={styles.container}>
+            <div className={styles.container} aria-label='QR code for document download'>
                 <QRCodeSVG
-                    value={props.url}
+                    value={url}
                     title='Scan to download private document'
                     size={280}
                     style={{ width: '100%', aspectRatio: '1' }}

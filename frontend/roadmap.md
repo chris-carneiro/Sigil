@@ -148,7 +148,7 @@ Each task follows this format:
 
 ## Code Review - High Priority
 
-### [⏳] Update ESLint Configuration
+### [✅] Update ESLint Configuration
 
 - **ID:** HIGH-001
 - **Type:** code-review
@@ -156,8 +156,8 @@ Each task follows this format:
 - **Phase:** 2
 - **Assigned Commit:** f7c8c3b2f16c61b6df4614d22cf7419ee12887a8
 - **Assigned Date:** 2025-01-XX
-- **Completed Commit:** f7c8c3b2f16c61b6df4614d22cf7419ee12887a8
-- **Completed Date:** 2025-01-XX
+- **Completed Commit:** a70e150
+- **Completed Date:** 2026-05-22
 - **Description:** Updated eslint.config.js with TypeScript plugin, style rules, and React rules.
 - **Files:** `eslint.config.js`, `package.json`
 - **Acceptance Criteria:**
@@ -166,7 +166,7 @@ Each task follows this format:
     - [x] TypeScript rules configured
     - [x] React hooks rules configured
 
-### [⏳] Add Prettier Configuration
+### [✅] Add Prettier Configuration
 
 - **ID:** HIGH-002
 - **Type:** code-review
@@ -174,8 +174,8 @@ Each task follows this format:
 - **Phase:** 2
 - **Assigned Commit:** f7c8c3b2f16c61b6df4614d22cf7419ee12887a8
 - **Assigned Date:** 2025-01-XX
-- **Completed Commit:** f7c8c3b2f16c61b6df4614d22cf7419ee12887a8
-- **Completed Date:** 2025-01-XX
+- **Completed Commit:** a70e150
+- **Completed Date:** 2026-05-22
 - **Description:** Add .prettierrc with consistent formatting rules matching ESLint.
 - **Files:** `.prettierrc`, `.prettierignore`, `package.json`
 - **Acceptance Criteria:**
@@ -184,16 +184,16 @@ Each task follows this format:
     - [x] Trailing commas
     - [x] Prettier installed as dev dependency
 
-### [⏳] Run Formatter on Entire Codebase
+### [✅] Run Formatter on Entire Codebase
 
 - **ID:** HIGH-003
 - **Type:** code-review
 - **Priority:** high
 - **Phase:** 2
-- **Assigned Commit:**
-- **Assigned Date:**
-- **Completed Commit:**
-- **Completed Date:**
+- **Assigned Commit:** a70e150
+- **Assigned Date:** 2026-05-22
+- **Completed Commit:** a3ceea5
+- **Completed Date:** 2026-06-06
 - **Description:** Run `npm run format` and `npm run lint:fix` to apply consistent formatting to all files.
 - **Files:** All source files
 - **Acceptance Criteria:**
@@ -201,16 +201,16 @@ Each task follows this format:
     - [ ] `npm run lint:fix` completes without errors
     - [ ] `npm run check` passes
 
-### [⏳] Improve Error Types
+### [✅] Improve Error Types
 
 - **ID:** HIGH-004
 - **Type:** code-review
 - **Priority:** high
 - **Phase:** 2
-- **Assigned Commit:**
-- **Assigned Date:**
-- **Completed Commit:**
-- **Completed Date:**
+- **Assigned Commit:** a3ceea5
+- **Assigned Date:** 2026-06-06
+- **Completed Commit:** 14ca829
+- **Completed Date:** 2026-06-07
 - **Description:** Replace generic string `code` in AppError with discriminated union type for exhaustive error handling.
 - **Files:** `src/types.ts`, `src/api/errors.ts`
 - **Acceptance Criteria:**
@@ -218,16 +218,16 @@ Each task follows this format:
     - [ ] AppError uses AppErrorCode for code field
     - [ ] uploadError and downloadError updated to use union type
 
-### [⏳] Add Accessibility Attributes
+### [✅] Add Accessibility Attributes
 
 - **ID:** HIGH-005
 - **Type:** code-review
 - **Priority:** high
 - **Phase:** 2
-- **Assigned Commit:**
-- **Assigned Date:**
+- **Assigned Commit:** a3ceea5
+- **Assigned Date:** 2026-06-06
 - **Completed Commit:**
-- **Completed Date:**
+- **Completed Date:** 2026-06-07
 - **Description:** Add ARIA labels and roles to interactive components for screen reader support.
 - **Files:** `src/components/upload/SelectFile.tsx`, `src/components/upload/FileDropzone.tsx`, `src/components/upload/QRCodeDisplay.tsx`
 - **Acceptance Criteria:**
@@ -254,16 +254,16 @@ Each task follows this format:
     - [ ] Cleanup timers in useEffect cleanup function
     - [ ] User feedback on errors
 
-### [⏳] Add Null Checks
+### [✅] Add Null Checks
 
 - **ID:** HIGH-007
 - **Type:** code-review
 - **Priority:** high
 - **Phase:** 2
-- **Assigned Commit:**
-- **Assigned Date:**
-- **Completed Commit:**
-- **Completed Date:**
+- **Assigned Commit:** 7e55ab5
+- **Assigned Date:** 2026-06-06
+- **Completed Commit:** 7e55ab5
+- **Completed Date:** 2026-06-06
 - **Description:** Add null checks for optional props to prevent runtime errors.
 - **Files:** `src/components/common/DocumentId.tsx`
 - **Acceptance Criteria:**
@@ -931,13 +931,13 @@ Each task follows this format:
 | Phase                | Total Tasks | Completed | In Progress | Pending | Completion % |
 | -------------------- | ----------- | --------- | ----------- | ------- | ------------ |
 | Phase 1 (Critical)   | 6           | 6         | 0           | 0       | 100%         |
-| Phase 2 (High)       | 9           | 2         | 0           | 7       | 22%          |
+| Phase 2 (High)       | 9           | 6         | 0           | 3       | 67%          |
 | Phase 3 (Test Infra) | 6           | 0         | 0           | 6       | 0%           |
 | Phase 4 (Unit Tests) | 6           | 0         | 0           | 6       | 0%           |
 | Phase 5 (E2E Tests)  | 7           | 0         | 0           | 7       | 0%           |
 | Phase 6 (Medium)     | 12          | 0         | 0           | 12      | 0%           |
 | Phase 7 (Low)        | 5           | 0         | 0           | 5       | 0%           |
-| **Total**            | **51**      | **8**     | **0**       | **43**  | **16%**      |
+| **Total**            | **51**      | **12**    | **0**       | **39**  | **24%**      |
 
 ## How to Use This Roadmap
 
@@ -995,5 +995,5 @@ grep "Phase: 1" roadmap.md
 
 ---
 
-**Last Updated:** 2026-05-25  
+**Last Updated:** 2026-06-07  
 **Next Review:** After Phase 2 completion
