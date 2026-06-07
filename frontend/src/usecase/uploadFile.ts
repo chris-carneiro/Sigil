@@ -59,13 +59,12 @@ export async function uploadFile(params: UploadParams) {
     const { documentId } = await uploadDocument(formData);
 
     const keyBytes = new Uint8Array(rawKey);
-    // Zeroize rawKey immediately after creating the encoding buffer
-    new Uint8Array(rawKey).fill(0);
     const encodedKey = keyBytes.toBase64({
         alphabet: 'base64url',
         omitPadding: true,
     });
-    // Zeroize the copy after encoding
+    // Zeroize rawKey after encoding
+    new Uint8Array(rawKey).fill(0);
     keyBytes.fill(0);
 
     return `${params.urlOrigin}/documents/download/${documentId}#${encodedKey}`;

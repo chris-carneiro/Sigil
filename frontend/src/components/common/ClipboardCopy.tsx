@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from './Button';
 import styles from './ClipboardCopy.module.css';
 
@@ -10,12 +10,35 @@ type CopyButtonProps = {
 
 export function ClipboardCopy({ label, textCopy, className, ...rest }: CopyButtonProps) {
     const [copied, setCopied] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, []);
+
     const handleCopy = async () => {
-        await navigator.clipboard.writeText(textCopy);
-        setCopied(true);
-        setTimeout(() => {
-            setCopied(false);
-        }, 3000);
+        setError(null);
+        try {
+            await navigator.clipboard.writeText(textCopy);
+            setCopied(true);
+            timeoutRef.current = setTimeout(() => {
+                setCopied(false);
+            }, 3000);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to copy to clipboard';
+            setError(errorMessage);
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+            timeoutRef.current = setTimeout(() => {
+                setError(null);
+            }, 3000);
+        }
     };
 
     return (
@@ -38,6 +61,28 @@ export function ClipboardCopy({ label, textCopy, className, ...rest }: CopyButto
                                 strokeWidth='1.5'
                                 strokeLinecap='round'
                                 strokeLinejoin='round'
+                            />
+                        </svg>
+                    ) : error ? (
+                        <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            width='16'
+                            height='16'
+                            viewBox='0 0 16 16'
+                            fill='none'
+                        >
+                            <circle
+                                cx='8'
+                                cy='8'
+                                r='7'
+                                stroke='var(--color-error)'
+                                strokeWidth='1.5'
+                            />
+                            <path
+                                d='M5 5L11 11M11 5L5 11'
+                                stroke='var(--color-error)'
+                                strokeWidth='1.5'
+                                strokeLinecap='round'
                             />
                         </svg>
                     ) : (
@@ -72,7 +117,9 @@ export function ClipboardCopy({ label, textCopy, className, ...rest }: CopyButto
                 }
                 onClick={handleCopy}
                 className={styles.iconButton}
+                aria-label={error ? 'Copy failed' : copied ? 'Copied' : 'Copy to clipboard'}
             />
+            {error && <span className={styles.error} role='alert'>{error}</span>}
         </div>
     );
 }
