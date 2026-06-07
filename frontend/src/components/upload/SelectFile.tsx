@@ -20,7 +20,7 @@ function SelectFile({ onFilesSelected }: SelectFileProps) {
 
     return (
         <div className={styles.container}>
-            <label className={styles.label} htmlFor='file-upload'>
+            <label id='file-upload-label' className={styles.label} htmlFor='file-upload'>
                 Drop files here, or click to upload.
             </label>
 
@@ -30,6 +30,8 @@ function SelectFile({ onFilesSelected }: SelectFileProps) {
                 ref={inputRef}
                 type='file'
                 onChange={handleSelectedFiles}
+                aria-label='Choose files to upload'
+                aria-describedby='file-upload-label'
             />
         </div>
     );
