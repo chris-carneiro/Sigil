@@ -4,7 +4,10 @@ export type AppErrorCode =
     | 'decryption-failed'
     | 'generic-error'
     | 'upload-error'
-    | 'invalid-link';
+    | 'invalid-link'
+    | 'invalid-file'
+    | 'file-too-large'
+    | 'file-type-not-allowed';
 
 export type AppError = {
     code: AppErrorCode;

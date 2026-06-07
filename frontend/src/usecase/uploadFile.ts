@@ -2,6 +2,7 @@ import { buildEnvelope } from '../crypto/envelope';
 import { encrypt } from '../crypto/encrypt';
 import { postDocument as uploadDocument } from '../api/documents';
 import { ALLOWED_MIME_TYPES, BLOCKED_EXTENSIONS, FILE_SIZE_LIMIT } from '../constants';
+import { FileTooLargeError, FileTypeNotAllowedError, InvalidFileError } from '../domain/errors';
 
 const applicationOctetStream = 'application/octet-stream';
 
@@ -36,15 +37,15 @@ export async function uploadFile(params: UploadParams) {
     const firstFile = params.files?.[0];
 
     if (!firstFile?.name) {
-        throw Error('Invalid file');
+        throw new InvalidFileError('Invalid file');
     }
 
     if (firstFile.size > FILE_SIZE_LIMIT) {
-        throw Error(`File is too large. Maximum size is ${FILE_SIZE_LIMIT / 1_000_000}MB`);
+        throw new FileTooLargeError(`File is too large. Maximum size is ${FILE_SIZE_LIMIT / 1_000_000}MB`);
     }
 
     if (!isFileTypeAllowed(firstFile)) {
-        throw Error('File type not allowed');
+        throw new FileTypeNotAllowedError('File type not allowed');
     }
 
     const envelope = await buildEnvelope(firstFile);
