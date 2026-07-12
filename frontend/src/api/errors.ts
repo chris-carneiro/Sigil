@@ -26,9 +26,12 @@ export function uploadError(error: unknown): AppError {
     if (error instanceof TypeError) {
         code = 'network-error';
         message = 'The server could not be reached, check your connectivity';
+    } else if (error instanceof DOMException && error.name === 'OperationError') {
+        code = 'encryption-failed';
+        message = 'The file could not be encrypted for upload';
     } else if (error instanceof DOMException) {
-        code = 'unexpected-error';
-        message = 'A browser operation failed during upload';
+        code = 'browser-operation-error';
+        message = `Browser operation failed: ${error.name}`;
     } else if (error instanceof InvalidFileError) {
         code = 'invalid-file';
         message = error.message;

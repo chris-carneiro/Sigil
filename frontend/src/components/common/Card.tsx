@@ -6,12 +6,10 @@ type CardProps = {
     className?: string;
 };
 
-export function Card(props: CardProps) {
+export function Card({ children, variant, className }: CardProps) {
     return (
-        <div
-            className={`${styles.card} ${props.variant === 'danger' ? styles.danger : ''} ${props.className} ?? ''`}
-        >
-            {props.children}
+        <div className={`${styles.card} ${variant === 'danger' ? styles.danger : ''} ${className ?? ''}`}>
+            {children}
         </div>
     );
 }
