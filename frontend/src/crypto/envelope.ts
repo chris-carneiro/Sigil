@@ -58,7 +58,7 @@ export async function buildEnvelope(file: File): Promise<Uint8Array<ArrayBuffer>
     return envelope;
 }
 
-async function buildFileBytes(file: File) {
+async function buildFileBytes(file: File): Promise<Uint8Array<ArrayBufferLike>> {
     const fileBuffer = await file.arrayBuffer();
     const fileBytes = new Uint8Array(fileBuffer);
     return fileBytes;
@@ -70,7 +70,7 @@ function buildJsonMetadata(metadata: string): Uint8Array {
     return jsonMetadata;
 }
 
-function buildHeader(metadataLength: number) {
+function buildHeader(metadataLength: number): Uint8Array{
     const headerBuffer = new ArrayBuffer(HEADER_LENGTH);
     const view = new DataView(headerBuffer);
     view.setUint32(0, metadataLength);
